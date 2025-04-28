@@ -1,0 +1,408 @@
+:root {
+  --bg-color-light: #f0f0f0;
+  --text-color-light: #333;
+  --primary-color-light: #007bff;
+  --container-bg-light: #fff;
+  --wall-color-light: #333;
+  --path-color-light: #eee;
+  --player-color-light: #ff4500;
+  --start-color-light: #00ff00;
+  --end-color-light: #ff0000;
+  --border-color-light: #ccc; /* Dodato */
+  --link-color-light: #0056b3; /* Dodato */
+
+  --bg-color-dark: #333;
+  --text-color-dark: #f0f0f0;
+  --primary-color-dark: #00aaff;
+  --container-bg-dark: #444;
+  --wall-color-dark: #ccc;
+  --path-color-dark: #555;
+  --player-color-dark: #ff6347;
+  --start-color-dark: #32cd32;
+  --end-color-dark: #dc143c;
+  --border-color-dark: #666; /* Dodato */
+  --link-color-dark: #66ccff; /* Dodato */
+}
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
+  line-height: 1.5; /* Poboljšaj čitljivost */
+}
+
+body[data-theme="light"] {
+  background-color: var(--bg-color-light);
+  color: var(--text-color-light);
+  --border-color: var(--border-color-light); /* Postavi trenutnu boju ivice */
+  --link-color: var(--link-color-light); /* Postavi trenutnu boju linka */
+  --text-color: var(--text-color-light); /* Postavi trenutnu boju teksta */
+}
+
+body[data-theme="dark"] {
+  background-color: var(--bg-color-dark);
+  color: var(--text-color-dark);
+  --border-color: var(--border-color-dark); /* Postavi trenutnu boju ivice */
+  --link-color: var(--link-color-dark); /* Postavi trenutnu boju linka */
+  --text-color: var(--text-color-dark); /* Postavi trenutnu boju teksta */
+}
+
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Malo jača senka */
+  transition: background-color 0.3s;
+  position: relative; /* For overlay positioning */
+}
+
+body[data-theme="light"] .container {
+  background-color: var(--container-bg-light);
+}
+
+body[data-theme="dark"] .container {
+  background-color: var(--container-bg-dark);
+}
+
+h1,
+h2 {
+  text-align: center;
+  margin-bottom: 1.5em; /* Dodaj malo više razmaka ispod naslova */
+}
+
+/* --- Auth/Menu Styles (index.html) --- */
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Malo veći razmak */
+  max-width: 300px;
+  margin: 20px auto;
+}
+
+input[type="text"],
+input[type="password"] {
+  padding: 12px; /* Malo veći padding */
+  border: 1px solid var(--border-color); /* Koristi varijablu */
+  border-radius: 4px;
+  background-color: var(--bg-color-light); /* Osnovna pozadina */
+  color: var(--text-color-light); /* Osnovni tekst */
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+body[data-theme="dark"] input[type="text"],
+body[data-theme="dark"] input[type="password"] {
+  background-color: var(
+    --container-bg-dark
+  ); /* Tamnija pozadina za tamnu temu */
+  color: var(--text-color-dark);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: var(--primary-color-light); /* Koristi primarnu boju za focus */
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Dodaj blagi sjaj */
+}
+body[data-theme="dark"] input[type="text"]:focus,
+body[data-theme="dark"] input[type="password"]:focus {
+  border-color: var(--primary-color-dark);
+  box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.25);
+}
+
+button {
+  padding: 12px 18px; /* Malo veći padding */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+  font-size: 1em;
+  font-weight: 600; /* Malo deblji font */
+}
+button:active {
+  transform: scale(0.98); /* Efekat pritiska */
+}
+
+body[data-theme="light"] button {
+  background-color: var(--primary-color-light);
+  color: white;
+}
+body[data-theme="dark"] button {
+  background-color: var(--primary-color-dark);
+  color: var(--text-color-dark);
+}
+
+body[data-theme="light"] button:hover {
+  background-color: #0056b3;
+}
+body[data-theme="dark"] button:hover {
+  background-color: #0077cc;
+}
+
+#register-btn {
+  background-color: #6c757d;
+}
+#register-btn:hover {
+  background-color: #5a6268;
+}
+
+#menu-section,
+#leaderboard-section,
+#achievements-section {
+  text-align: center;
+  margin-top: 30px; /* Povećaj razmak */
+}
+
+#menu-section button,
+#leaderboard-section button,
+#achievements-section button {
+  margin: 8px; /* Povećaj razmak između dugmića */
+}
+
+.message {
+  text-align: center;
+  margin-top: 15px; /* Povećaj razmak */
+  font-weight: bold;
+  min-height: 1.5em; /* Osiguraj prostor i kad nema poruke */
+}
+
+.hidden {
+  display: none !important; /* Ensure this rule applies */
+}
+
+#leaderboard-table {
+  width: 100%;
+  margin-top: 20px; /* Povećaj razmak */
+  border-collapse: collapse;
+}
+
+#leaderboard-table th,
+#leaderboard-table td {
+  border: 1px solid var(--border-color); /* Koristi varijablu */
+  padding: 10px; /* Povećaj padding */
+  text-align: left;
+}
+
+#leaderboard-table th {
+  background-color: #f2f2f2;
+}
+body[data-theme="dark"] #leaderboard-table th {
+  background-color: #555;
+}
+
+#achievements-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px; /* Povećaj razmak */
+  max-width: 400px; /* Ograniči širinu liste */
+  margin-left: auto;
+  margin-right: auto;
+}
+#achievements-list li {
+  margin-bottom: 10px; /* Povećaj razmak */
+  padding: 8px; /* Povećaj padding */
+  border-bottom: 1px dashed var(--border-color); /* Koristi varijablu */
+}
+#achievements-list li:last-child {
+  border-bottom: none; /* Ukloni ivicu sa poslednjeg elementa */
+}
+
+/* --- Game Styles (game.html) --- */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-ui {
+  display: flex;
+  justify-content: space-around;
+  align-items: center; /* Vertikalno poravnaj elemente */
+  width: 100%;
+  margin-bottom: 15px;
+  flex-wrap: wrap; /* Wrap elements on smaller screens */
+  gap: 15px; /* Povećaj razmak */
+  padding: 5px 0; /* Dodaj malo vertikalnog paddinga */
+}
+
+.game-ui span {
+  font-size: 1.1em;
+  font-weight: 600; /* Istakni UI podatke */
+  white-space: nowrap; /* Spreči prelamanje teksta unutar span-a */
+}
+
+#mazeCanvas {
+  border: 1px solid var(--border-color); /* Koristi varijablu */
+  max-width: 100%;
+  height: auto;
+  display: block; /* Ukloni eventualni razmak ispod canvasa */
+  margin: 0 auto; /* Centriraj horizontalno */
+  /* We'll set width/height via JS based on maze size */
+}
+
+body[data-theme="dark"] #mazeCanvas {
+  border-color: #666;
+}
+
+#message-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75); /* Malo tamniji overlay */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  z-index: 10;
+  border-radius: 8px; /* Match container */
+  padding: 20px; /* Dodaj padding unutar overlay-a */
+  box-sizing: border-box; /* Uračunaj padding u dimenzije */
+}
+#message-overlay p {
+  /* Stil za tekst unutar overlay-a */
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  line-height: 1.6;
+}
+#message-overlay button {
+  /* Stil za dugmad unutar overlay-a */
+  margin-top: 10px;
+}
+#message-overlay.hidden {
+  display: none !important;
+}
+
+/* --- Theme Toggle --- */
+#theme-toggle,
+#theme-toggle-game {
+  position: absolute;
+  top: 15px; /* Malo pomeri nadole */
+  right: 15px; /* Malo pomeri ulevo */
+  padding: 6px 12px; /* Prilagodi padding */
+  font-size: 0.85em; /* Prilagodi font */
+  z-index: 5; /* Osiguraj da je iznad containera ali ispod overlay-a */
+}
+/* Adjust position for game screen */
+.game-ui #theme-toggle-game {
+  position: static; /* Override absolute positioning */
+  order: 5; /* Stavi ga na kraj flex reda ako je potrebno */
+}
+
+/* Footer Styles */
+footer {
+  text-align: center; /* Centriraj tekst */
+  margin-top: 40px; /* Dodaj razmak iznad footera */
+  padding: 20px 10px; /* Dodaj i horizontalni padding */
+  border-top: 1px solid var(--border-color); /* Koristi varijablu */
+  font-size: 0.85em; /* Malo manji font */
+  color: var(--text-color); /* Koristi varijablu */
+  width: 100%; /* Osiguraj da zauzima celu širinu */
+  box-sizing: border-box; /* Uračunaj padding */
+}
+
+footer p {
+  margin: 0; /* Ukloni podrazumevanu marginu paragrafa */
+}
+
+footer a {
+  color: var(--link-color); /* Koristi boju linka teme */
+  text-decoration: none; /* Ukloni podvlačenje */
+}
+
+footer a:hover,
+footer a:focus {
+  /* Dodaj stil za hover i focus radi pristupačnosti */
+  text-decoration: underline; /* Dodaj podvlačenje na hover/focus */
+  opacity: 0.8; /* Blago zatamnjenje */
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  body {
+    padding: 0; /* Ukloni padding sa body */
+    margin: 0; /* Ukloni marginu sa body */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .container {
+    padding: 10px; /* Malo veći padding nego pre */
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box; /* Uračunaj padding */
+  }
+  .auth-container {
+    justify-content: center; /* Centriraj auth formu vertikalno */
+  }
+  .game-container {
+    justify-content: space-between; /* Rasporedi UI i canvas */
+  }
+  .auth-container form {
+    max-width: 90%;
+    gap: 10px; /* Smanji razmak u formi */
+  }
+  .game-ui {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px; /* Prilagodi razmak */
+    margin-bottom: 10px; /* Povećaj razmak ispod UI */
+    padding: 5px 0;
+  }
+  .game-ui span {
+    font-size: 0.9em;
+    padding: 3px 6px; /* Dodaj malo paddinga radi boljeg izgleda */
+    border: 1px solid var(--border-color); /* Opciono: dodaj ivicu */
+    border-radius: 4px;
+    background-color: var(--container-bg-dark); /* Pozadina za bolji kontrast */
+    color: var(--text-color-dark);
+  }
+  body[data-theme="light"] .game-ui span {
+    background-color: var(--container-bg-light);
+    color: var(--text-color-light);
+  }
+
+  #mazeCanvas {
+    max-width: 100%;
+    /* Visina se računa u JS, max-height je sada tamo */
+    margin: auto;
+    border: none;
+  }
+  h1 {
+    font-size: 1.4em; /* Još malo smanji */
+    margin-bottom: 15px;
+  }
+  h2 {
+    font-size: 1.1em; /* Još malo smanji */
+    margin-bottom: 1em;
+  }
+  button {
+    font-size: 0.85em; /* Smanji font dugmića */
+    padding: 10px 14px;
+  }
+  #theme-toggle,
+  #theme-toggle-game {
+    position: absolute;
+    top: 8px; /* Prilagodi poziciju */
+    right: 8px;
+    font-size: 0.75em;
+    padding: 5px 10px;
+    z-index: 20;
+  }
+
+  footer {
+    font-size: 0.7em; /* Još manji font */
+    padding: 8px 5px; /* Smanji padding */
+    margin-top: 5px; /* Smanji marginu */
+    border-top: none;
+  }
+}

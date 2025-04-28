@@ -140,24 +140,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Use window dimensions for mobile, parent dimensions otherwise
     const isMobile = window.innerWidth <= 600; // Check if likely mobile based on CSS breakpoint
+    // Further reduce padding/margin space estimate for mobile height - try minimum
+    const mobileVerticalPadding = 40; // Keep this minimal (for UI)
+    // Use full innerWidth on mobile, container padding is handled by box-sizing
     const availableWidth = isMobile
       ? window.innerWidth
       : canvas.parentElement.clientWidth * 0.9;
-    // Estimate available height better on mobile, subtract space for UI/header/footer
-    // Adjust the subtracted value (e.g., 100) based on actual UI height
     const availableHeight = isMobile
-      ? window.innerHeight - 100
+      ? window.innerHeight - mobileVerticalPadding
       : window.innerHeight * 0.7;
 
     const maxCellSizeW = Math.floor(availableWidth / mazeWidth);
     const maxCellSizeH = Math.floor(availableHeight / mazeHeight);
 
-    // Reduce max cell size slightly on mobile for better fit
-    const maxAllowedCellSize = isMobile ? 25 : 30;
+    // Allow larger cells on mobile by increasing the hard limit significantly
+    const maxAllowedCellSize = isMobile ? 50 : 30; // Povećan limit za mobilne na 50
     cellSize = Math.max(
-      5,
+      5, // Ensure minimum cell size
+      // Limit only by available space and the new larger cap
       Math.min(maxCellSizeW, maxCellSizeH, maxAllowedCellSize)
-    ); // Ensure minimum cell size
+    );
     playerSize = cellSize * 0.6; // Player slightly smaller than cell
 
     canvas.width = mazeWidth * cellSize;
@@ -167,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // const marginTop = Math.max(0, (availableHeight - canvas.height) / 2);
     // canvas.style.marginTop = `${marginTop}px`;
     console.log(
-      `Resized canvas to: ${canvas.width}x${canvas.height}, CellSize: ${cellSize}`
+      `Resized canvas to: ${canvas.width}x${canvas.height}, CellSize: ${cellSize}, Available H: ${availableHeight}, Available W: ${availableWidth}` // Log width too
     );
   }
 

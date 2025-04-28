@@ -344,7 +344,8 @@ footer a:focus {
     justify-content: center; /* Centriraj auth formu vertikalno */
   }
   .game-container {
-    justify-content: space-between; /* Rasporedi UI i canvas */
+    justify-content: flex-start; /* Počni od vrha */
+    padding-top: 2px; /* Smanjen razmak od vrha */
   }
   .auth-container form {
     max-width: 90%;
@@ -354,8 +355,8 @@ footer a:focus {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px; /* Prilagodi razmak */
-    margin-bottom: 10px; /* Povećaj razmak ispod UI */
+    gap: 8px; /* Smanjen razmak između UI elemenata */
+    margin-bottom: 5px; /* Smanjen razmak ispod UI */
     padding: 5px 0;
   }
   .game-ui span {
@@ -374,8 +375,12 @@ footer a:focus {
   #mazeCanvas {
     max-width: 100%;
     /* Visina se računa u JS, max-height je sada tamo */
-    margin: auto;
+    /* margin: auto; */ /* UKLONJENO */
+    margin-top: 5px; /* Dodaj mali razmak iznad canvasa */
+    margin-left: auto; /* Opciono: zadrži horizontalno centriranje ako je uži od ekrana */
+    margin-right: auto; /* Opciono: zadrži horizontalno centriranje ako je uži od ekrana */
     border: none;
+    display: block;
   }
   h1 {
     font-size: 1.4em; /* Još malo smanji */
@@ -400,6 +405,19 @@ footer a:focus {
   }
 
   footer {
+    font-size: 0.7em; /* Još manji font */
+    padding: 8px 5px; /* Smanji padding */
+    margin-top: 5px; /* Smanji marginu */
+    border-top: none;
+  }
+
+  /* Sakrij footer samo na stranici igre na mobilnom */
+  .game-body footer {
+    display: none;
+  }
+
+  /* Prilagodi footer stilove za index.html na mobilnom */
+  body:not(.game-body) footer {
     font-size: 0.7em; /* Još manji font */
     padding: 8px 5px; /* Smanji padding */
     margin-top: 5px; /* Smanji marginu */

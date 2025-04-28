@@ -27,9 +27,14 @@
 body {
   font-family: sans-serif;
   margin: 0;
-  padding: 20px;
+  /* padding: 20px; */ /* Uklanjamo osnovni padding, dodaćemo ga kontejneru ako treba */
   transition: background-color 0.3s, color 0.3s;
   line-height: 1.5; /* Poboljšaj čitljivost */
+  display: flex; /* Omogući Flexbox */
+  min-height: 100vh; /* Minimalna visina celog ekrana */
+  justify-content: center; /* Horizontalno centriranje */
+  align-items: center; /* Vertikalno centriranje */
+  flex-direction: column; /* Poređaj elemente (kontejner, footer) vertikalno */
 }
 
 body[data-theme="light"] {
@@ -50,12 +55,15 @@ body[data-theme="dark"] {
 
 .container {
   max-width: 800px;
-  margin: 20px auto;
+  /* margin: 20px auto; */ /* Uklonjeno - Flexbox na body centrira */
+  margin-top: 20px; /* Dodaj malo razmaka od vrha ako je sadržaj visok */
+  margin-bottom: 20px; /* Dodaj malo razmaka od dna/footera */
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Malo jača senka */
   transition: background-color 0.3s;
   position: relative; /* For overlay positioning */
+  width: 90%; /* Osiguraj da ne bude preširok na velikim ekranima */
 }
 
 body[data-theme="light"] .container {
@@ -295,10 +303,11 @@ body[data-theme="dark"] #mazeCanvas {
 /* Footer Styles */
 footer {
   text-align: center; /* Centriraj tekst */
-  margin-top: 40px; /* Dodaj razmak iznad footera */
-  padding: 20px 10px; /* Dodaj i horizontalni padding */
+  /* margin-top: 40px; */ /* Uklonjeno - flex razmak će upravljati */
+  margin-top: auto; /* Gurni footer na dno ako ima prostora */
+  padding: 15px 10px; /* Malo smanjen padding */
   border-top: 1px solid var(--border-color); /* Koristi varijablu */
-  font-size: 0.85em; /* Malo manji font */
+  font-size: 0.8em; /* Malo manji font */
   color: var(--text-color); /* Koristi varijablu */
   width: 100%; /* Osiguraj da zauzima celu širinu */
   box-sizing: border-box; /* Uračunaj padding */
@@ -323,29 +332,33 @@ footer a:focus {
 /* --- Responsive --- */
 @media (max-width: 600px) {
   body {
-    padding: 0; /* Ukloni padding sa body */
-    margin: 0; /* Ukloni marginu sa body */
+    /* Responsive body već koristi flex, samo osiguraj da nema paddinga */
+    padding: 0;
+    margin: 0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    /* justify-content: center; */ /* Ukloni ako želiš da game-container počne od vrha */
+    /* align-items: center; */ /* Ukloni ako želiš da game-container zauzme širinu */
   }
   .container {
-    padding: 10px; /* Malo veći padding nego pre */
-    margin: 0;
+    /* padding: 10px; */ /* Stari padding */
+    padding: 10px 0; /* Novi padding: 10px gore/dole, 0 levo/desno */
+    margin: 0; /* Ukloni margine na mobilnom */
     border-radius: 0;
     box-shadow: none;
-    width: 100%;
-    flex-grow: 1;
+    width: 100%; /* Ceo ekran */
+    flex-grow: 1; /* Neka raste da popuni prostor */
     display: flex;
     flex-direction: column;
-    box-sizing: border-box; /* Uračunaj padding */
+    box-sizing: border-box;
   }
   .auth-container {
-    justify-content: center; /* Centriraj auth formu vertikalno */
+    justify-content: center; /* Centriraj auth formu vertikalno unutar containera */
   }
   .game-container {
     justify-content: flex-start; /* Počni od vrha */
-    padding-top: 2px; /* Smanjen razmak od vrha */
+    padding-top: 0; /* Uklonjen padding od vrha */
   }
   .auth-container form {
     max-width: 90%;
@@ -355,16 +368,19 @@ footer a:focus {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px; /* Smanjen razmak između UI elemenata */
-    margin-bottom: 5px; /* Smanjen razmak ispod UI */
-    padding: 5px 0;
+    gap: 5px; /* Još manji razmak između UI elemenata */
+    /* margin-bottom: 2px; */ /* UKLONJENO */
+    padding: 2px 0; /* Minimalni vertikalni padding */
+    width: 100%; /* Osiguraj da zauzima širinu */
+    box-sizing: border-box; /* Uračunaj padding */
+    order: -1; /* Stavi UI iznad canvasa u flex redosledu */
   }
   .game-ui span {
-    font-size: 0.9em;
-    padding: 3px 6px; /* Dodaj malo paddinga radi boljeg izgleda */
-    border: 1px solid var(--border-color); /* Opciono: dodaj ivicu */
-    border-radius: 4px;
-    background-color: var(--container-bg-dark); /* Pozadina za bolji kontrast */
+    font-size: 0.8em; /* Malo manji font za UI span */
+    padding: 2px 4px; /* Manji padding */
+    border: 1px solid var(--border-color);
+    border-radius: 3px; /* Manji radius */
+    background-color: var(--container-bg-dark);
     color: var(--text-color-dark);
   }
   body[data-theme="light"] .game-ui span {
@@ -376,11 +392,13 @@ footer a:focus {
     max-width: 100%;
     /* Visina se računa u JS, max-height je sada tamo */
     /* margin: auto; */ /* UKLONJENO */
-    margin-top: 5px; /* Dodaj mali razmak iznad canvasa */
-    margin-left: auto; /* Opciono: zadrži horizontalno centriranje ako je uži od ekrana */
-    margin-right: auto; /* Opciono: zadrži horizontalno centriranje ako je uži od ekrana */
+    /* margin-top: 2px; */ /* UKLONJENO */
+    /* margin-left: auto; */ /* UKLONJENO */
+    /* margin-right: auto; */ /* UKLONJENO */
+    margin: 0; /* Osiguraj da nema margina */
     border: none;
     display: block;
+    order: 0; /* Stavi canvas ispod UI u flex redosledu */
   }
   h1 {
     font-size: 1.4em; /* Još malo smanji */
@@ -420,7 +438,7 @@ footer a:focus {
   body:not(.game-body) footer {
     font-size: 0.7em; /* Još manji font */
     padding: 8px 5px; /* Smanji padding */
-    margin-top: 5px; /* Smanji marginu */
+    margin-top: 5px; /* Ne treba auto margina ovde */
     border-top: none;
   }
 }

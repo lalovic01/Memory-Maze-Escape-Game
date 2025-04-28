@@ -140,14 +140,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Use window dimensions for mobile, parent dimensions otherwise
     const isMobile = window.innerWidth <= 600; // Check if likely mobile based on CSS breakpoint
-    // Further reduce padding/margin space estimate for mobile height - try minimum
-    const mobileVerticalPadding = 40; // Keep this minimal (for UI)
+    // Set vertical padding to 0 to maximize available height
+    const mobileVerticalPadding = 0; // Postavljeno na 0
     // Use full innerWidth on mobile, container padding is handled by box-sizing
     const availableWidth = isMobile
       ? window.innerWidth
       : canvas.parentElement.clientWidth * 0.9;
     const availableHeight = isMobile
-      ? window.innerHeight - mobileVerticalPadding
+      ? window.innerHeight - mobileVerticalPadding // Sada koristi punu visinu
       : window.innerHeight * 0.7;
 
     const maxCellSizeW = Math.floor(availableWidth / mazeWidth);

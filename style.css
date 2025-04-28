@@ -294,6 +294,28 @@ body[data-theme="dark"] #mazeCanvas {
   font-size: 0.85em; /* Prilagodi font */
   z-index: 5; /* Osiguraj da je iznad containera ali ispod overlay-a */
 }
+
+/* Sound Toggle Button */
+.sound-toggle {
+  position: absolute;
+  top: 6px;
+  /* Postavi levo od theme dugmeta */
+  left: 24px; /* Prilagodi ovu vrednost po potrebi */
+  padding: 6px 10px; /* Malo drugačiji padding */
+  font-size: 1.1em; /* Veća ikonica */
+  background: none; /* Bez pozadine */
+  border: none;
+  cursor: pointer;
+  z-index: 5;
+  /* Ukloni default button stilove koji mogu smetati */
+  line-height: 1;
+}
+/* Ukloni hover efekte za sound toggle ako ne želiš */
+body[data-theme="light"] .sound-toggle:hover,
+body[data-theme="dark"] .sound-toggle:hover {
+  background-color: transparent;
+}
+
 /* Adjust position for game screen */
 .game-ui #theme-toggle-game {
   position: static; /* Override absolute positioning */
@@ -419,6 +441,16 @@ footer a:focus {
     right: 8px;
     font-size: 0.75em;
     padding: 5px 10px;
+    z-index: 20;
+  }
+
+  /* Sound Toggle na mobilnom */
+  .sound-toggle {
+    position: absolute;
+    top: -1px;
+    left: 24px; /* Prilagodi poziciju levo od theme dugmeta */
+    font-size: 1em; /* Malo veća ikonica na mobilnom */
+    padding: 5px 8px;
     z-index: 20;
   }
 

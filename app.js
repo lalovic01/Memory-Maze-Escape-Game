@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Global Namespace ---
+  window.mazeGame = window.mazeGame || {};
+
+  // --- DOM Elements ---
   const loginForm = document.getElementById("login-form");
-  const registerBtn = document.getElementById("register-btn");
   const usernameInput = document.getElementById("username");
   const passwordInput = document.getElementById("password");
+  const registerBtn = document.getElementById("register-btn");
   const authMessage = document.getElementById("auth-message");
   const authSection = document.getElementById("auth-section");
   const menuSection = document.getElementById("menu-section");
@@ -10,63 +14,94 @@ document.addEventListener("DOMContentLoaded", () => {
   const startGameBtn = document.getElementById("start-game-btn");
   const leaderboardBtn = document.getElementById("leaderboard-btn");
   const achievementsBtn = document.getElementById("achievements-btn");
+  const resetProgressBtn = document.getElementById("reset-progress-btn");
   const logoutBtn = document.getElementById("logout-btn");
-  const resetProgressBtn = document.getElementById("reset-progress-btn"); // Get reset button
-  const menuMessage = document.getElementById("menu-message"); // Get menu message area
-  const themeToggle = document.getElementById("theme-toggle");
+  const menuMessage = document.getElementById("menu-message");
   const leaderboardSection = document.getElementById("leaderboard-section");
+  const leaderboardTableBody = document.querySelector(
+    "#leaderboard-table tbody"
+  );
   const achievementsSection = document.getElementById("achievements-section");
+  const achievementsList = document.getElementById("achievements-list");
   const backToMenuBtns = document.querySelectorAll(".back-to-menu");
-  const leaderboardSound = document.getElementById("leaderboard-sound"); // Get leaderboard sound element
-  const startSound = document.getElementById("start-sound"); // Get start sound element
+  const themeToggle = document.getElementById("theme-toggle");
+  const toggleSoundBtn = document.getElementById("toggle-sound-btn"); // Novo dugme
 
-  const USERS_KEY = "mazeGameUsers";
-  const CURRENT_USER_KEY = "mazeGameCurrentUser";
-  const THEME_KEY = "mazeGameTheme";
+  // --- Sound Elements (index.html specific) ---
+  const leaderboardSound = document.getElementById("leaderboard-sound");
+  const startSound = document.getElementById("start-sound");
+  const indexAudioElements = [leaderboardSound, startSound].filter(Boolean); // Filtriraj null ako neki ne postoji
 
-  // --- Theme Handling ---
-  const applyTheme = (theme) => {
-    document.body.setAttribute("data-theme", theme);
-    localStorage.setItem(THEME_KEY, theme);
-  };
+  // --- State ---
+  let currentUser = null;
+  let isMuted = localStorage.getItem("mazeGameMuted") === "true"; // Učitaj stanje
 
-  const toggleTheme = () => {
-    const currentTheme = document.body.getAttribute("data-theme") || "light";
-    const newTheme = currentTheme === "light" ? "dark" : "light";
-    applyTheme(newTheme);
-  };
+  // --- Initialization ---
+  function initApp() {
+    // Apply theme
+    const savedTheme = localStorage.getItem("mazeGameTheme") || "light";
+    applyTheme(savedTheme);
 
-  // Apply saved theme on load
-  const savedTheme = localStorage.getItem(THEME_KEY) || "light";
-  applyTheme(savedTheme);
+    // Apply initial mute state
+    applyMuteState(isMuted);
 
-  if (themeToggle) {
-    themeToggle.addEventListener("click", toggleTheme);
-  }
-  // Theme toggle might also exist on game page, handle if needed elsewhere
-  const themeToggleGame = document.getElementById("theme-toggle-game");
-  if (themeToggleGame) {
-    themeToggleGame.addEventListener("click", toggleTheme);
+    // Check login status
+    currentUser = getCurrentUser();
+    if (currentUser) {
+      showMenu();
+    } else {
+      showAuth();
+    }
   }
 
-  // --- User Management ---
+  // --- Sound Control ---
+  function applyMuteState(muted) {
+    isMuted = muted;
+    // Ažuriraj ikonicu dugmeta
+    if (toggleSoundBtn) {
+      toggleSoundBtn.textContent = muted ? "🔇" : "🔊";
+    }
+    // Ažuriraj sve audio elemente na ovoj stranici
+    indexAudioElements.forEach((audio) => {
+      if (audio) audio.muted = muted;
+    });
+    // Sačuvaj stanje u localStorage
+    localStorage.setItem("mazeGameMuted", muted);
+    console.log("Sound state updated:", muted ? "Muted" : "Unmuted");
+  }
+
+  // Funkcija za puštanje zvuka uz proveru mute stanja
+  function playSound(audioElement) {
+    // Proveri direktno iz localStorage jer je ovo globalna funkcija
+    const currentlyMuted = localStorage.getItem("mazeGameMuted") === "true";
+    if (audioElement && !currentlyMuted) {
+      audioElement.currentTime = 0; // Premotaj na početak
+      audioElement
+        .play()
+        .catch((e) => console.error("Greška pri puštanju zvuka:", e));
+    }
+  }
+  // Izloži playSound globalno ako je potrebno iz game.js (mada game.js može sam da proveri localStorage)
+  // window.mazeGame.playSound = playSound;
+
+  // --- Authentication ---
   const getUsers = () => {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+    return JSON.parse(localStorage.getItem("mazeGameUsers") || "[]");
   };
 
   const saveUsers = (users) => {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    localStorage.setItem("mazeGameUsers", JSON.stringify(users));
   };
 
   const getCurrentUser = () => {
-    return localStorage.getItem(CURRENT_USER_KEY);
+    return localStorage.getItem("mazeGameCurrentUser");
   };
 
   const setCurrentUser = (username) => {
     if (username) {
-      localStorage.setItem(CURRENT_USER_KEY, username);
+      localStorage.setItem("mazeGameCurrentUser", username);
     } else {
-      localStorage.removeItem(CURRENT_USER_KEY);
+      localStorage.removeItem("mazeGameCurrentUser");
     }
   };
 
@@ -84,7 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // --- Authentication ---
   const showMessage = (
     message,
     isError = false,
@@ -188,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  const showAuth = () => {
+  function showAuth() {
     stopLeaderboardSound(); // Stop sound if returning from leaderboard to auth
     stopStartSound(); // Stop start sound if logging out
     if (authSection) authSection.classList.remove("hidden");
@@ -197,9 +231,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (achievementsSection) achievementsSection.classList.add("hidden");
     if (loginForm) loginForm.reset();
     showMessage("");
-  };
+    if (themeToggle) themeToggle.classList.remove("hidden"); // Pokaži theme toggle na auth
+    if (toggleSoundBtn) toggleSoundBtn.classList.add("hidden"); // Sakrij sound toggle na auth
+  }
 
-  const showMenu = () => {
+  function showMenu() {
     console.log("showMenu function called."); // Log: Ulazak u funkciju
     stopLeaderboardSound(); // Stop sound when returning to menu
     const username = getCurrentUser();
@@ -230,9 +266,11 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       console.error("Start sound element NOT found!"); // Log: Element nije pronađen
     }
-  };
+    if (themeToggle) themeToggle.classList.remove("hidden"); // Pokaži theme toggle u meniju
+    if (toggleSoundBtn) toggleSoundBtn.classList.remove("hidden"); // Pokaži sound toggle u meniju
+  }
 
-  const showLeaderboard = () => {
+  function showLeaderboard() {
     console.log("showLeaderboard function called."); // Log: Function entry
     stopStartSound(); // Stop start sound when going to leaderboard
     if (menuSection) menuSection.classList.add("hidden");
@@ -259,9 +297,11 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       console.error("Leaderboard sound element NOT found!"); // Log: Element not found
     }
-  };
+    if (themeToggle) themeToggle.classList.add("hidden"); // Sakrij theme toggle na leaderboard
+    if (toggleSoundBtn) toggleSoundBtn.classList.add("hidden"); // Sakrij sound toggle na leaderboard
+  }
 
-  const showAchievements = () => {
+  function showAchievements() {
     console.log("showAchievements function called."); // Log: Ulazak u funkciju
     stopStartSound(); // Stop start sound when going to achievements
     stopLeaderboardSound(); // Stop leaderboard sound if switching to achievements
@@ -270,13 +310,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (achievementsSection) achievementsSection.classList.remove("hidden"); // Show achievements
     populateAchievements();
     // Nema puštanja zvuka ovde
-  };
+    if (themeToggle) themeToggle.classList.add("hidden"); // Sakrij theme toggle na achievements
+    if (toggleSoundBtn) toggleSoundBtn.classList.add("hidden"); // Sakrij sound toggle na achievements
+  }
 
   // --- Leaderboard ---
   const populateLeaderboard = () => {
-    const leaderboardTableBody = document.querySelector(
-      "#leaderboard-table tbody"
-    );
     if (!leaderboardTableBody) return;
 
     leaderboardTableBody.innerHTML = ""; // Clear previous entries
@@ -322,7 +361,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Achievements ---
   const populateAchievements = () => {
-    const achievementsList = document.getElementById("achievements-list");
     if (!achievementsList) return;
 
     achievementsList.innerHTML = ""; // Clear previous entries
@@ -377,6 +415,64 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // --- Theme Toggle ---
+  function applyTheme(theme) {
+    document.body.setAttribute("data-theme", theme);
+    localStorage.setItem("mazeGameTheme", theme);
+    if (themeToggle) {
+      // Optional: Change button text/icon based on theme
+      // themeToggle.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
+    }
+  }
+  window.mazeGame.applyTheme = applyTheme; // Expose for game.js
+
+  // --- Event Listeners ---
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLogin);
+  }
+  if (registerBtn) {
+    registerBtn.addEventListener("click", handleRegister);
+  }
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", handleLogout);
+  }
+  if (startGameBtn) {
+    startGameBtn.addEventListener("click", () => {
+      playSound(startSound); // Koristi novu funkciju
+      // Malo odlaganje pre preusmeravanja da bi se zvuk čuo
+      setTimeout(() => {
+        window.location.href = "game.html";
+      }, 150); // 150ms odlaganje
+    });
+  }
+  if (leaderboardBtn) {
+    leaderboardBtn.addEventListener("click", showLeaderboard);
+  }
+  if (achievementsBtn) {
+    achievementsBtn.addEventListener("click", showAchievements);
+  }
+  if (resetProgressBtn) {
+    resetProgressBtn.addEventListener("click", () => {
+      stopStartSound(); // Explicitly stop sound on reset click
+      handleResetProgress();
+    });
+  }
+  backToMenuBtns.forEach((btn) => {
+    btn.addEventListener("click", showMenu);
+  });
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      const currentTheme = document.body.getAttribute("data-theme") || "light";
+      applyTheme(currentTheme === "light" ? "dark" : "light");
+    });
+  }
+  // Listener za novo dugme za zvuk
+  if (toggleSoundBtn) {
+    toggleSoundBtn.addEventListener("click", () => {
+      applyMuteState(!isMuted); // Toggle i primeni novo stanje
+    });
+  }
+
   // --- Global User Data Access (for game.js) ---
   // Expose functions to window scope or use a shared object if preferred
   window.mazeGame = {
@@ -387,43 +483,8 @@ document.addEventListener("DOMContentLoaded", () => {
     applyTheme, // Allow game.js to apply theme if needed on load
   };
 
-  // --- Event Listeners ---
-  if (loginForm) {
-    loginForm.addEventListener("submit", handleLogin);
-  }
-  if (registerBtn) {
-    registerBtn.addEventListener("click", handleRegister);
-  }
-  if (logoutBtn) {
-    // Calls handleLogout -> showAuth -> stopStartSound() - OK
-    logoutBtn.addEventListener("click", handleLogout);
-  }
-  if (resetProgressBtn) {
-    resetProgressBtn.addEventListener("click", () => {
-      stopStartSound(); // Explicitly stop sound on reset click
-      handleResetProgress();
-    });
-  }
-  if (startGameBtn) {
-    // This listener already calls stopStartSound()
-    startGameBtn.addEventListener("click", () => {
-      console.log("Start Game button clicked. Calling stopStartSound()."); // Log: Button click
-      stopStartSound(); // Stop start sound before navigating to game
-      window.location.href = "game.html"; // Navigate to game page
-    });
-  }
-  if (leaderboardBtn) {
-    // Calls showLeaderboard -> stopStartSound() - OK
-    leaderboardBtn.addEventListener("click", showLeaderboard);
-  }
-  if (achievementsBtn) {
-    // Calls showAchievements -> stopStartSound() - OK
-    achievementsBtn.addEventListener("click", showAchievements);
-  }
-  backToMenuBtns.forEach((btn) => {
-    // Calls showMenu which restarts the sound, this is intended when returning TO menu
-    btn.addEventListener("click", showMenu);
-  });
+  // --- Run Init ---
+  initApp();
 
   // --- Initial State ---
   if (getCurrentUser()) {

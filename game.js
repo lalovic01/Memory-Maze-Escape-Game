@@ -28,6 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const collisionSound = document.getElementById("collision-sound");
   const winSound = document.getElementById("win-sound");
   const backgroundMusic = document.getElementById("background-music"); // Get background music element
+  const gameAudioElements = [collisionSound, winSound, backgroundMusic].filter(
+    Boolean
+  );
 
   // --- Game State ---
   let currentLevelIndex = 0;
@@ -45,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let gameActive = false; // Is the player allowed to move?
   let userData = window.mazeGame.getUserData(currentUser);
   let collisionSoundTimeout = null; // Za čuvanje setTimeout reference
+  let isMuted = localStorage.getItem("mazeGameMuted") === "true"; // Učitaj globalno stanje
 
   // --- Touch Controls State ---
   let touchStartX = 0;
@@ -55,6 +59,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Initialization ---
   function initGame() {
+    // Apply mute state to game sounds initially
+    applyMuteStateToGameSounds(isMuted);
+
     // Load user progress
     currentLevelIndex = userData.progress.currentLevel - 1; // 0-based index
     if (currentLevelIndex >= levels.length) {
@@ -67,7 +74,26 @@ document.addEventListener("DOMContentLoaded", () => {
     loadLevel(currentLevelIndex);
   }
 
+  // Helper function to apply mute state to game sounds
+  function applyMuteStateToGameSounds(muted) {
+    isMuted = muted; // Update local state variable as well
+    gameAudioElements.forEach((audio) => {
+      if (audio) audio.muted = muted;
+    });
+    // If unmuting and music should be playing, start it (handle potential race conditions carefully)
+    // For simplicity, we'll let the game logic restart music when appropriate.
+    // If muting, pause background music immediately
+    if (muted && backgroundMusic && !backgroundMusic.paused) {
+      backgroundMusic.pause();
+      console.log("Background music paused due to mute.");
+    }
+  }
+
   function loadLevel(levelIndex) {
+    // Read mute state again in case it changed on another tab (optional but safer)
+    isMuted = localStorage.getItem("mazeGameMuted") === "true";
+    applyMuteStateToGameSounds(isMuted);
+
     stopCollisionSound(); // Zaustavi zvuk ako je prethodno svirao
     pauseBackgroundMusic(); // Pauziraj muziku pri učitavanju nivoa
     clearTimeout(viewTimeout);
@@ -267,7 +293,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Check wall collision
     if (currentLevelData.maze[nextY][nextX] === 1) {
-      if (collisionSound) {
+      // Proveri mute stanje PRE puštanja zvuka
+      isMuted = localStorage.getItem("mazeGameMuted") === "true"; // Pročitaj ponovo
+      if (collisionSound && !isMuted) {
+        // Dodata provera !isMuted
         stopCollisionSound(); // Zaustavi prethodni ako je svirao
         collisionSound.currentTime = 0; // Počni od početka
         collisionSound
@@ -287,6 +316,8 @@ document.addEventListener("DOMContentLoaded", () => {
           .catch((e) =>
             console.error("Greška pri puštanju collision zvuka:", e)
           );
+      } else if (isMuted) {
+        console.log("Collision sound muted.");
       }
       handleCollision();
       return;
@@ -304,12 +335,16 @@ document.addEventListener("DOMContentLoaded", () => {
       playerPos.y === currentLevelData.end.y
     ) {
       stopCollisionSound(); // Zaustavi zvuk sudara ako je svirao pre pobede
-      // Play win sound
-      if (winSound) {
+      // Play win sound - Proveri mute stanje
+      isMuted = localStorage.getItem("mazeGameMuted") === "true"; // Pročitaj ponovo
+      if (winSound && !isMuted) {
+        // Dodata provera !isMuted
         winSound.currentTime = 0;
         winSound
           .play()
           .catch((e) => console.error("Greška pri puštanju win zvuka:", e));
+      } else if (isMuted) {
+        console.log("Win sound muted.");
       }
       handleWin();
     }
@@ -576,6 +611,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Update canvas colors and redraw immediately
       updateThemeColors(); // Recalculate wallColor, pathColor etc.
       drawMaze(); // Redraw the maze and player with new colors
+
+      // Re-apply mute state just in case (though unlikely necessary)
+      isMuted = localStorage.getItem("mazeGameMuted") === "true";
+      applyMuteStateToGameSounds(isMuted);
     });
   }
 
@@ -584,11 +623,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (document.hidden) {
       pauseBackgroundMusic();
     } else {
-      // Only resume if game is supposed to be active (might need more complex state check)
-      // For simplicity, we let loadLevel handle restarting music
-      // if (gameActive && backgroundMusic && backgroundMusic.paused) {
-      //     backgroundMusic.play().catch(e => console.error("Greška pri nastavljanju pozadinske muzike:", e));
-      // }
+      // Only resume if game is active AND not muted
+      isMuted = localStorage.getItem("mazeGameMuted") === "true";
+      if (gameActive && !isMuted) {
+        // Dodata provera !isMuted
+        playBackgroundMusic(); // Pokušaj ponovo da pustiš muziku
+      }
     }
   });
 
@@ -623,14 +663,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Funkcija za kontrolu pozadinske muzike
   function playBackgroundMusic() {
-    if (backgroundMusic) {
-      backgroundMusic.currentTime = 49; // Počni od 49. sekunde
-      backgroundMusic
-        .play()
-        .catch((e) =>
-          console.error("Greška pri puštanju pozadinske muzike:", e)
-        );
-      console.log("Playing background music from 49s.");
+    isMuted = localStorage.getItem("mazeGameMuted") === "true"; // Pročitaj ponovo
+    if (backgroundMusic && !isMuted) {
+      // Dodata provera !isMuted
+      // Pusti samo ako nije već pokrenuta
+      if (backgroundMusic.paused) {
+        backgroundMusic.currentTime = 49; // Počni od 49. sekunde
+        backgroundMusic
+          .play()
+          .catch((e) =>
+            console.error("Greška pri puštanju pozadinske muzike:", e)
+          );
+        console.log("Playing background music from 49s.");
+      } else {
+        console.log("Background music already playing.");
+      }
+    } else if (isMuted) {
+      console.log("Background music muted.");
+      // Osiguraj da je pauzirana ako je stanje mute
+      pauseBackgroundMusic();
     }
   }
 
@@ -640,4 +691,13 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Background music paused.");
     }
   }
+
+  // Optional: Listen for storage changes to update mute state immediately
+  window.addEventListener("storage", (event) => {
+    if (event.key === "mazeGameMuted") {
+      console.log("Mute state changed in another tab/window.");
+      const newMuteState = event.newValue === "true";
+      applyMuteStateToGameSounds(newMuteState);
+    }
+  });
 });

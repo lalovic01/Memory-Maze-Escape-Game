@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="sr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Maze Escape - Login</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-theme="light">
+    <div class="container auth-container">
+      <h1>Memory Maze Escape</h1>
+
+      <div id="auth-section">
+        <h2>Login / Registracija</h2>
+        <form id="login-form">
+          <input
+            type="text"
+            id="username"
+            placeholder="Korisničko ime"
+            required
+          />
+          <input type="password" id="password" placeholder="Lozinka" required />
+          <button type="submit">Login</button>
+          <button type="button" id="register-btn">Registracija</button>
+          <p id="auth-message" class="message"></p>
+        </form>
+      </div>
+
+      <div id="menu-section" class="hidden">
+        <h2>Dobrodošli, <span id="welcome-username"></span>!</h2>
+        <button id="start-game-btn">Započni Igru</button>
+        <button id="leaderboard-btn">Leaderboard</button>
+        <button id="achievements-btn">Dostignuća</button>
+        <button id="reset-progress-btn">Resetuj Progres</button>
+        <!-- New Button -->
+        <button id="logout-btn">Odjavi se</button>
+        <p id="menu-message" class="message"></p>
+        <!-- Optional message area for reset confirmation -->
+      </div>
+
+      <div id="leaderboard-section" class="hidden">
+        <h2>Leaderboard</h2>
+        <table id="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Korisnik</th>
+              <th>Nivo</th>
+              <th>Najbolje Vreme (s)</th>
+              <th>Pokušaji</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Podaci će biti ubačeni pomoću JS -->
+          </tbody>
+        </table>
+        <button class="back-to-menu">Nazad na Meni</button>
+      </div>
+
+      <div id="achievements-section" class="hidden">
+        <h2>Dostignuća</h2>
+        <ul id="achievements-list">
+          <!-- Dostignuća će biti ubačena pomoću JS -->
+        </ul>
+        <button class="back-to-menu">Nazad na Meni</button>
+      </div>
+
+      <button id="theme-toggle">Promeni Temu</button>
+    </div>
+
+    <!-- Add Leaderboard Sound Element -->
+    <audio
+      id="leaderboard-sound"
+      src="assets/leaderboard.wav"
+      preload="auto"
+    ></audio>
+    <!-- Add Start Sound Element for Menu -->
+    <audio id="start-sound" src="assets/start.wav" preload="auto"></audio>
+
+    <script src="app.js"></script>
+
+    <footer>
+      <p>
+        Autor: Mladen Lalović | Instagram:
+        <a
+          href="https://www.instagram.com/lalovic203_"
+          target="_blank"
+          rel="noopener noreferrer"
+          >lalovic203_</a
+        >
+        | Email: mladenlalovic01@gmail.com
+      </p>
+    </footer>
+  </body>
+</html>

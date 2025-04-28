@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="sr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Maze Escape - Igra</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-theme="light">
+    <div class="container game-container">
+      <div class="game-ui">
+        <span>Nivo: <span id="level-display">1</span></span>
+        <span>Vreme: <span id="timer-display">0.0</span>s</span>
+        <span>Pokušaji: <span id="attempts-display">0</span></span>
+        <button id="back-to-menu-game">Nazad na Meni</button>
+        <button id="theme-toggle-game">Promeni Temu</button>
+      </div>
+      <canvas id="mazeCanvas"></canvas>
+      <div id="message-overlay" class="hidden">
+        <p id="message-text"></p>
+        <button id="next-level-btn" class="hidden">Sledeći Nivo</button>
+        <button id="restart-level-btn" class="hidden">Pokušaj Ponovo</button>
+        <!-- New button for returning to menu after final level -->
+        <button id="back-to-menu-win-btn" class="hidden">Nazad na Meni</button>
+      </div>
+    </div>
+
+    <!-- Optional Sound Elements -->
+    <audio id="collision-sound" src="assets/genije.wav" preload="auto"></audio>
+    <!-- Update win sound source -->
+    <audio id="win-sound" src="assets/pobeda.wav" preload="auto"></audio>
+    <!-- Background Music -->
+    <audio
+      id="background-music"
+      src="assets/uzicko.wav"
+      preload="auto"
+      loop
+    ></audio>
+
+    <script src="levels.js"></script>
+    <script src="app.js"></script>
+    <script src="game.js"></script>
+  </body>
+</html>

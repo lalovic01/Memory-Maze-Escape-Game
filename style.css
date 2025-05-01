@@ -8,8 +8,12 @@
   --player-color-light: #ff4500;
   --start-color-light: #00ff00;
   --end-color-light: #ff0000;
-  --border-color-light: #ccc; /* Dodato */
-  --link-color-light: #0056b3; /* Dodato */
+  --border-color-light: #ccc;
+  --link-color-light: #0056b3;
+  --button-text-light: #ffffff;
+  --overlay-bg-color-light: rgba(50, 50, 50, 0.75);
+  --overlay-text-color-light: #ffffff;
+  --timer-bar-bg-light: var(--primary-color-light);
 
   --bg-color-dark: #333;
   --text-color-dark: #f0f0f0;
@@ -20,50 +24,60 @@
   --player-color-dark: #ff6347;
   --start-color-dark: #32cd32;
   --end-color-dark: #dc143c;
-  --border-color-dark: #666; /* Dodato */
-  --link-color-dark: #66ccff; /* Dodato */
+  --border-color-dark: #666;
+  --link-color-dark: #66ccff;
+  --button-text-dark: var(--text-color-dark);
+  --overlay-bg-color-dark: rgba(0, 0, 0, 0.8);
+  --overlay-text-color-dark: #f0f0f0;
+  --timer-bar-bg-dark: var(--primary-color-dark);
 }
 
 body {
   font-family: sans-serif;
   margin: 0;
-  /* padding: 20px; */ /* Uklanjamo osnovni padding, dodaćemo ga kontejneru ako treba */
   transition: background-color 0.3s, color 0.3s;
-  line-height: 1.5; /* Poboljšaj čitljivost */
-  display: flex; /* Omogući Flexbox */
-  min-height: 100vh; /* Minimalna visina celog ekrana */
-  justify-content: center; /* Horizontalno centriranje */
-  align-items: center; /* Vertikalno centriranje */
-  flex-direction: column; /* Poređaj elemente (kontejner, footer) vertikalno */
+  line-height: 1.5;
+  display: flex;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 body[data-theme="light"] {
   background-color: var(--bg-color-light);
   color: var(--text-color-light);
-  --border-color: var(--border-color-light); /* Postavi trenutnu boju ivice */
-  --link-color: var(--link-color-light); /* Postavi trenutnu boju linka */
-  --text-color: var(--text-color-light); /* Postavi trenutnu boju teksta */
+  --border-color: var(--border-color-light);
+  --link-color: var(--link-color-light);
+  --text-color: var(--text-color-light);
+  --button-text-color: var(--button-text-light);
+  --overlay-bg-color: var(--overlay-bg-color-light);
+  --overlay-text-color: var(--overlay-text-color-light);
+  --timer-bar-bg: var(--timer-bar-bg-light);
 }
 
 body[data-theme="dark"] {
   background-color: var(--bg-color-dark);
   color: var(--text-color-dark);
-  --border-color: var(--border-color-dark); /* Postavi trenutnu boju ivice */
-  --link-color: var(--link-color-dark); /* Postavi trenutnu boju linka */
-  --text-color: var(--text-color-dark); /* Postavi trenutnu boju teksta */
+  --border-color: var(--border-color-dark);
+  --link-color: var(--link-color-dark);
+  --text-color: var(--text-color-dark);
+  --button-text-color: var(--button-text-dark);
+  --overlay-bg-color: var(--overlay-bg-color-dark);
+  --overlay-text-color: var(--overlay-text-color-dark);
+  --timer-bar-bg: var(--timer-bar-bg-dark);
 }
 
 .container {
   max-width: 800px;
-  /* margin: 20px auto; */ /* Uklonjeno - Flexbox na body centrira */
-  margin-top: 20px; /* Dodaj malo razmaka od vrha ako je sadržaj visok */
-  margin-bottom: 20px; /* Dodaj malo razmaka od dna/footera */
+  margin-top: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Malo jača senka */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s;
-  position: relative; /* For overlay positioning */
-  width: 90%; /* Osiguraj da ne bude preširok na velikim ekranima */
+  position: relative;
+  width: 90%;
 }
 
 body[data-theme="light"] .container {
@@ -77,40 +91,37 @@ body[data-theme="dark"] .container {
 h1,
 h2 {
   text-align: center;
-  margin-bottom: 1.5em; /* Dodaj malo više razmaka ispod naslova */
+  margin-bottom: 1.5em;
 }
 
-/* --- Auth/Menu Styles (index.html) --- */
 .auth-container form {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Malo veći razmak */
+  gap: 12px;
   max-width: 300px;
   margin: 20px auto;
 }
 
 input[type="text"],
 input[type="password"] {
-  padding: 12px; /* Malo veći padding */
-  border: 1px solid var(--border-color); /* Koristi varijablu */
+  padding: 12px;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: var(--bg-color-light); /* Osnovna pozadina */
-  color: var(--text-color-light); /* Osnovni tekst */
+  background-color: var(--bg-color-light);
+  color: var(--text-color-light);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 body[data-theme="dark"] input[type="text"],
 body[data-theme="dark"] input[type="password"] {
-  background-color: var(
-    --container-bg-dark
-  ); /* Tamnija pozadina za tamnu temu */
+  background-color: var(--container-bg-dark);
   color: var(--text-color-dark);
 }
 
 input[type="text"]:focus,
 input[type="password"]:focus {
   outline: none;
-  border-color: var(--primary-color-light); /* Koristi primarnu boju za focus */
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Dodaj blagi sjaj */
+  border-color: var(--primary-color-light);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 body[data-theme="dark"] input[type="text"]:focus,
 body[data-theme="dark"] input[type="password"]:focus {
@@ -119,25 +130,25 @@ body[data-theme="dark"] input[type="password"]:focus {
 }
 
 button {
-  padding: 12px 18px; /* Malo veći padding */
+  padding: 12px 18px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.1s;
   font-size: 1em;
-  font-weight: 600; /* Malo deblji font */
+  font-weight: 600;
 }
 button:active {
-  transform: scale(0.98); /* Efekat pritiska */
+  transform: scale(0.98);
 }
 
 body[data-theme="light"] button {
   background-color: var(--primary-color-light);
-  color: white;
+  color: var(--button-text-color);
 }
 body[data-theme="dark"] button {
   background-color: var(--primary-color-dark);
-  color: var(--text-color-dark);
+  color: var(--button-text-color);
 }
 
 body[data-theme="light"] button:hover {
@@ -156,38 +167,40 @@ body[data-theme="dark"] button:hover {
 
 #menu-section,
 #leaderboard-section,
-#achievements-section {
+#achievements-section,
+#how-to-play-section {
   text-align: center;
-  margin-top: 30px; /* Povećaj razmak */
+  margin-top: 30px;
 }
 
 #menu-section button,
 #leaderboard-section button,
-#achievements-section button {
-  margin: 8px; /* Povećaj razmak između dugmića */
+#achievements-section button,
+#how-to-play-section button {
+  margin: 8px;
 }
 
 .message {
   text-align: center;
-  margin-top: 15px; /* Povećaj razmak */
+  margin-top: 15px;
   font-weight: bold;
-  min-height: 1.5em; /* Osiguraj prostor i kad nema poruke */
+  min-height: 1.5em;
 }
 
 .hidden {
-  display: none !important; /* Ensure this rule applies */
+  display: none !important;
 }
 
 #leaderboard-table {
   width: 100%;
-  margin-top: 20px; /* Povećaj razmak */
+  margin-top: 20px;
   border-collapse: collapse;
 }
 
 #leaderboard-table th,
 #leaderboard-table td {
-  border: 1px solid var(--border-color); /* Koristi varijablu */
-  padding: 10px; /* Povećaj padding */
+  border: 1px solid var(--border-color);
+  padding: 10px;
   text-align: left;
 }
 
@@ -201,51 +214,75 @@ body[data-theme="dark"] #leaderboard-table th {
 #achievements-list {
   list-style: none;
   padding: 0;
-  margin-top: 20px; /* Povećaj razmak */
-  max-width: 400px; /* Ograniči širinu liste */
+  margin-top: 20px;
+  max-width: 400px;
   margin-left: auto;
   margin-right: auto;
 }
 #achievements-list li {
-  margin-bottom: 10px; /* Povećaj razmak */
-  padding: 8px; /* Povećaj padding */
-  border-bottom: 1px dashed var(--border-color); /* Koristi varijablu */
+  margin-bottom: 10px;
+  padding: 8px;
+  border-bottom: 1px dashed var(--border-color);
 }
 #achievements-list li:last-child {
-  border-bottom: none; /* Ukloni ivicu sa poslednjeg elementa */
+  border-bottom: none;
 }
 
-/* --- Game Styles (game.html) --- */
+#how-to-play-section .instructions-content {
+  text-align: left;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background-color: var(--bg-color-light);
+}
+body[data-theme="dark"] #how-to-play-section .instructions-content {
+  background-color: var(--container-bg-dark);
+}
+
+#how-to-play-section ul {
+  list-style-position: inside;
+  padding-left: 10px;
+}
+#how-to-play-section li {
+  margin-bottom: 8px;
+}
+
 .game-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 
 .game-ui {
   display: flex;
   justify-content: space-around;
-  align-items: center; /* Vertikalno poravnaj elemente */
+  align-items: center;
   width: 100%;
   margin-bottom: 15px;
-  flex-wrap: wrap; /* Wrap elements on smaller screens */
-  gap: 15px; /* Povećaj razmak */
-  padding: 5px 0; /* Dodaj malo vertikalnog paddinga */
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 5px 0;
 }
 
 .game-ui span {
   font-size: 1.1em;
-  font-weight: 600; /* Istakni UI podatke */
-  white-space: nowrap; /* Spreči prelamanje teksta unutar span-a */
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 #mazeCanvas {
-  border: 1px solid var(--border-color); /* Koristi varijablu */
+  border: 1px solid var(--border-color);
   max-width: 100%;
   height: auto;
-  display: block; /* Ukloni eventualni razmak ispod canvasa */
-  margin: 0 auto; /* Centriraj horizontalno */
-  /* We'll set width/height via JS based on maze size */
+  display: block;
+  margin: 0 auto;
+  transition: opacity 0.3s ease-out;
+}
+#mazeCanvas.maze-fading {
+  opacity: 0.5;
 }
 
 body[data-theme="dark"] #mazeCanvas {
@@ -258,219 +295,348 @@ body[data-theme="dark"] #mazeCanvas {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.75); /* Malo tamniji overlay */
+  background-color: var(--overlay-bg-color);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: white;
+  color: var(--overlay-text-color);
   text-align: center;
   z-index: 10;
-  border-radius: 8px; /* Match container */
-  padding: 20px; /* Dodaj padding unutar overlay-a */
-  box-sizing: border-box; /* Uračunaj padding u dimenzije */
+  border-radius: 8px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 #message-overlay p {
-  /* Stil za tekst unutar overlay-a */
   margin-bottom: 15px;
   font-size: 1.2em;
   line-height: 1.6;
 }
 #message-overlay button {
-  /* Stil za dugmad unutar overlay-a */
   margin-top: 10px;
 }
 #message-overlay.hidden {
   display: none !important;
 }
 
-/* --- Theme Toggle --- */
+#view-timer-bar-container {
+  position: absolute;
+  top: 5px;
+  left: 10%;
+  width: 80%;
+  height: 8px;
+  background-color: rgba(128, 128, 128, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 5;
+}
+#view-timer-bar-container.hidden {
+  display: none;
+}
+
+#view-timer-bar {
+  height: 100%;
+  width: 100%;
+  background-color: var(--timer-bar-bg);
+  border-radius: 4px;
+  transition: width 0.1s linear;
+}
+
+.controls-container {
+  display: none;
+  position: fixed;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  grid-template-areas:
+    ". up ."
+    "left down right";
+  grid-template-columns: 60px 60px 60px;
+  grid-template-rows: 60px 60px;
+  gap: 5px;
+  opacity: 0.7;
+}
+
+.controls-container button {
+  font-size: 1.8em;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#btn-up {
+  grid-area: up;
+}
+#btn-left {
+  grid-area: left;
+}
+#btn-down {
+  grid-area: down;
+}
+#btn-right {
+  grid-area: right;
+}
+
+@media (max-width: 768px) and (pointer: coarse), (hover: none) {
+  .controls-container {
+    display: grid;
+  }
+}
+
 #theme-toggle,
 #theme-toggle-game {
   position: absolute;
-  top: 15px; /* Malo pomeri nadole */
-  right: 15px; /* Malo pomeri ulevo */
-  padding: 6px 12px; /* Prilagodi padding */
-  font-size: 0.85em; /* Prilagodi font */
-  z-index: 5; /* Osiguraj da je iznad containera ali ispod overlay-a */
+  top: 15px;
+  right: 15px;
+  padding: 6px 12px;
+  font-size: 0.85em;
+  z-index: 5;
 }
 
-/* Sound Toggle Button */
 .sound-toggle {
   position: absolute;
   top: 6px;
-  /* Postavi levo od theme dugmeta */
-  left: 24px; /* Prilagodi ovu vrednost po potrebi */
-  padding: 6px 10px; /* Malo drugačiji padding */
-  font-size: 1.1em; /* Veća ikonica */
-  background: none; /* Bez pozadine */
+  left: 24px;
+  padding: 6px 10px;
+  font-size: 1.1em;
+  background: none;
   border: none;
   cursor: pointer;
   z-index: 5;
-  /* Ukloni default button stilove koji mogu smetati */
   line-height: 1;
 }
-/* Ukloni hover efekte za sound toggle ako ne želiš */
 body[data-theme="light"] .sound-toggle:hover,
 body[data-theme="dark"] .sound-toggle:hover {
   background-color: transparent;
 }
 
-/* Adjust position for game screen */
 .game-ui #theme-toggle-game {
-  position: static; /* Override absolute positioning */
-  order: 5; /* Stavi ga na kraj flex reda ako je potrebno */
+  position: static;
+  order: 5;
 }
 
-/* Footer Styles */
 footer {
-  text-align: center; /* Centriraj tekst */
-  /* margin-top: 40px; */ /* Uklonjeno - flex razmak će upravljati */
-  margin-top: auto; /* Gurni footer na dno ako ima prostora */
-  padding: 15px 10px; /* Malo smanjen padding */
-  border-top: 1px solid var(--border-color); /* Koristi varijablu */
-  font-size: 0.8em; /* Malo manji font */
-  color: var(--text-color); /* Koristi varijablu */
-  width: 100%; /* Osiguraj da zauzima celu širinu */
-  box-sizing: border-box; /* Uračunaj padding */
+  text-align: center;
+  margin-top: auto;
+  padding: 15px 10px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.8em;
+  color: var(--text-color);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 footer p {
-  margin: 0; /* Ukloni podrazumevanu marginu paragrafa */
+  margin: 0;
 }
 
 footer a {
-  color: var(--link-color); /* Koristi boju linka teme */
-  text-decoration: none; /* Ukloni podvlačenje */
+  color: var(--link-color);
+  text-decoration: none;
 }
 
 footer a:hover,
 footer a:focus {
-  /* Dodaj stil za hover i focus radi pristupačnosti */
-  text-decoration: underline; /* Dodaj podvlačenje na hover/focus */
-  opacity: 0.8; /* Blago zatamnjenje */
+  text-decoration: underline;
+  opacity: 0.8;
 }
 
-/* --- Responsive --- */
 @media (max-width: 600px) {
   body {
-    /* Responsive body već koristi flex, samo osiguraj da nema paddinga */
     padding: 0;
     margin: 0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */ /* Ukloni ako želiš da game-container počne od vrha */
-    /* align-items: center; */ /* Ukloni ako želiš da game-container zauzme širinu */
   }
   .container {
-    /* padding: 10px; */ /* Stari padding */
-    padding: 10px 0; /* Novi padding: 10px gore/dole, 0 levo/desno */
-    margin: 0; /* Ukloni margine na mobilnom */
+    padding: 10px 0;
+    margin: 0;
     border-radius: 0;
     box-shadow: none;
-    width: 100%; /* Ceo ekran */
-    flex-grow: 1; /* Neka raste da popuni prostor */
+    width: 100%;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
   }
   .auth-container {
-    justify-content: center; /* Centriraj auth formu vertikalno unutar containera */
+    justify-content: center;
   }
   .game-container {
-    justify-content: flex-start; /* Počni od vrha */
-    padding-top: 0; /* Uklonjen padding od vrha */
+    justify-content: flex-start;
+    padding-top: 5px;
   }
   .auth-container form {
     max-width: 90%;
-    gap: 10px; /* Smanji razmak u formi */
+    gap: 10px;
   }
   .game-ui {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 5px; /* Još manji razmak između UI elemenata */
-    /* margin-bottom: 2px; */ /* UKLONJENO */
-    padding: 2px 0; /* Minimalni vertikalni padding */
-    width: 100%; /* Osiguraj da zauzima širinu */
-    box-sizing: border-box; /* Uračunaj padding */
-    order: -1; /* Stavi UI iznad canvasa u flex redosledu */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto auto;
+    gap: 5px 10px;
+    width: calc(100% - 20px);
+    margin: 0 auto 5px auto;
+    padding: 5px;
+    box-sizing: border-box;
+    order: -1;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--container-bg-light);
+  }
+  body[data-theme="dark"] .game-ui {
+    background-color: var(--container-bg-dark);
   }
   .game-ui span {
-    font-size: 0.8em; /* Malo manji font za UI span */
-    padding: 2px 4px; /* Manji padding */
-    border: 1px solid var(--border-color);
-    border-radius: 3px; /* Manji radius */
-    background-color: var(--container-bg-dark);
-    color: var(--text-color-dark);
+    font-size: 0.9em;
+    padding: 4px 6px;
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--text-color);
+    text-align: center;
+    white-space: nowrap;
   }
-  body[data-theme="light"] .game-ui span {
-    background-color: var(--container-bg-light);
-    color: var(--text-color-light);
+  body[data-theme="light"] .game-ui span,
+  body[data-theme="dark"] .game-ui span {
+    background-color: transparent;
+    color: var(--text-color);
   }
-
+  .game-ui #back-to-menu-game {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+    margin: 0 auto;
+    padding: 6px 10px;
+  }
+  .game-ui #theme-toggle-game {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    margin: 0 auto;
+    padding: 6px 10px;
+    position: static;
+    order: 0;
+  }
   #mazeCanvas {
     max-width: 100%;
-    /* Visina se računa u JS, max-height je sada tamo */
-    /* margin: auto; */ /* UKLONJENO */
-    /* margin-top: 2px; */ /* UKLONJENO */
-    /* margin-left: auto; */ /* UKLONJENO */
-    /* margin-right: auto; */ /* UKLONJENO */
-    margin: 0; /* Osiguraj da nema margina */
+    margin: 0;
     border: none;
     display: block;
-    order: 0; /* Stavi canvas ispod UI u flex redosledu */
+    order: 1;
+    transition: opacity 0.3s ease-out;
+  }
+  #mazeCanvas.maze-fading {
+    opacity: 0.5;
   }
   h1 {
-    font-size: 1.4em; /* Još malo smanji */
+    font-size: 1.4em;
     margin-bottom: 15px;
   }
   h2 {
-    font-size: 1.1em; /* Još malo smanji */
+    font-size: 1.1em;
     margin-bottom: 1em;
   }
   button {
-    font-size: 0.85em; /* Smanji font dugmića */
+    font-size: 0.85em;
     padding: 10px 14px;
   }
   #theme-toggle,
   #theme-toggle-game {
     position: absolute;
-    top: 8px; /* Prilagodi poziciju */
+    top: 8px;
     right: 8px;
     font-size: 0.75em;
     padding: 5px 10px;
     z-index: 20;
   }
-
-  /* Sound Toggle na mobilnom */
   .sound-toggle {
     position: absolute;
     top: -1px;
-    left: 24px; /* Prilagodi poziciju levo od theme dugmeta */
-    font-size: 1em; /* Malo veća ikonica na mobilnom */
+    left: 24px;
+    font-size: 1em;
     padding: 5px 8px;
     z-index: 20;
   }
-
   footer {
-    font-size: 0.7em; /* Još manji font */
-    padding: 8px 5px; /* Smanji padding */
-    margin-top: 5px; /* Smanji marginu */
+    font-size: 0.7em;
+    padding: 8px 5px;
+    margin-top: 5px;
     border-top: none;
   }
-
-  /* Sakrij footer samo na stranici igre na mobilnom */
   .game-body footer {
     display: none;
   }
-
-  /* Prilagodi footer stilove za index.html na mobilnom */
   body:not(.game-body) footer {
-    font-size: 0.7em; /* Još manji font */
-    padding: 8px 5px; /* Smanji padding */
-    margin-top: 5px; /* Ne treba auto margina ovde */
+    font-size: 0.7em;
+    padding: 8px 5px;
+    margin-top: 5px;
     border-top: none;
   }
+  .controls-container {
+    bottom: 10px;
+    grid-template-columns: 50px 50px 50px;
+    grid-template-rows: 50px 50px;
+    gap: 3px;
+  }
+  .controls-container button {
+    font-size: 1.5em;
+  }
+  #view-timer-bar-container {
+    position: relative;
+    order: 0;
+    width: calc(100% - 20px);
+    left: auto;
+    margin: 0 auto 5px auto;
+    top: auto;
+    height: 12px;
+    z-index: 1;
+  }
+}
+
+@keyframes screenShake {
+  0% {
+    transform: translate(2px, 1px) rotate(0deg);
+  }
+  10% {
+    transform: translate(-1px, -2px) rotate(-0.5deg);
+  }
+  20% {
+    transform: translate(-3px, 0px) rotate(0.5deg);
+  }
+  30% {
+    transform: translate(3px, 2px) rotate(0deg);
+  }
+  40% {
+    transform: translate(1px, -1px) rotate(0.5deg);
+  }
+  50% {
+    transform: translate(-1px, 3px) rotate(-0.5deg);
+  }
+  60% {
+    transform: translate(-3px, 1px) rotate(0deg);
+  }
+  70% {
+    transform: translate(3px, 1px) rotate(-0.5deg);
+  }
+  80% {
+    transform: translate(-1px, -1px) rotate(0.5deg);
+  }
+  90% {
+    transform: translate(2px, 3px) rotate(0deg);
+  }
+  100% {
+    transform: translate(1px, -2px) rotate(-0.5deg);
+  }
+}
+
+.screen-shake {
+  animation: screenShake 0.35s ease-in-out;
 }

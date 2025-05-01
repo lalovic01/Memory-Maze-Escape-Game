@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // --- Ensure user is logged in ---
   const currentUser = window.mazeGame.getCurrentUser();
   if (!currentUser) {
     alert("Morate biti ulogovani da biste igrali.");
@@ -7,11 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // --- Apply Theme ---
   const savedTheme = localStorage.getItem("mazeGameTheme") || "light";
-  window.mazeGame.applyTheme(savedTheme); // Use function from app.js
+  window.mazeGame.applyTheme(savedTheme);
 
-  // --- DOM Elements ---
   const canvas = document.getElementById("mazeCanvas");
   const ctx = canvas.getContext("2d");
   const levelDisplay = document.getElementById("level-display");
@@ -22,67 +19,67 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextLevelBtn = document.getElementById("next-level-btn");
   const restartLevelBtn = document.getElementById("restart-level-btn");
   const backToMenuBtn = document.getElementById("back-to-menu-game");
-  const backToMenuWinBtn = document.getElementById("back-to-menu-win-btn"); // Get the new button
+  const backToMenuWinBtn = document.getElementById("back-to-menu-win-btn");
+  const viewTimerBarContainer = document.getElementById(
+    "view-timer-bar-container"
+  );
+  const viewTimerBar = document.getElementById("view-timer-bar");
+  const controlsContainer = document.getElementById("controls-container");
+  const btnUp = document.getElementById("btn-up");
+  const btnDown = document.getElementById("btn-down");
+  const btnLeft = document.getElementById("btn-left");
+  const btnRight = document.getElementById("btn-right");
 
-  // --- Sound Elements (Optional) ---
   const collisionSound = document.getElementById("collision-sound");
   const winSound = document.getElementById("win-sound");
-  const backgroundMusic = document.getElementById("background-music"); // Get background music element
+  const backgroundMusic = document.getElementById("background-music");
   const gameAudioElements = [collisionSound, winSound, backgroundMusic].filter(
     Boolean
   );
 
-  // --- Game State ---
   let currentLevelIndex = 0;
   let currentLevelData;
   let playerPos;
   let mazeVisible = true;
   let viewTimeout;
+  let viewTimerInterval;
   let gameTimerInterval;
   let startTime;
   let elapsedTime = 0;
   let attempts = 0;
-  let cellSize; // Calculated based on canvas size and maze dimensions
+  let cellSize;
   let playerSize;
-  let wallColor, pathColor, playerColor, startColor, endColor; // Theme dependent colors
-  let gameActive = false; // Is the player allowed to move?
+  let wallColor, pathColor, playerColor, startColor, endColor;
+  let gameActive = false;
   let userData = window.mazeGame.getUserData(currentUser);
-  let collisionSoundTimeout = null; // Za čuvanje setTimeout reference
-  let isMuted = localStorage.getItem("mazeGameMuted") === "true"; // Učitaj globalno stanje
+  let collisionSoundTimeout = null;
+  let isMuted = localStorage.getItem("mazeGameMuted") === "true";
 
-  // --- Touch Controls State ---
   let touchStartX = 0;
   let touchStartY = 0;
   let touchEndX = 0;
   let touchEndY = 0;
-  const swipeThreshold = 30; // Minimum distance in pixels to register as a swipe
+  const swipeThreshold = 30;
 
-  // --- Initialization ---
   function initGame() {
-    // Apply mute state to game sounds initially
     applyMuteStateToGameSounds(isMuted);
 
-    // Load user progress
-    currentLevelIndex = userData.progress.currentLevel - 1; // 0-based index
+    currentLevelIndex = userData.progress.currentLevel - 1;
     if (currentLevelIndex >= levels.length) {
-      // User has completed all levels, just redirect to menu
       console.log("Svi nivoi pređeni. Preusmeravanje na meni.");
       window.location.href = "index.html";
-      return; // Stop further execution of initGame
+      return;
     }
-    // If not all levels completed, load the current level
     loadLevel(currentLevelIndex);
+
+    if (controlsContainer) controlsContainer.style.display = "none";
   }
 
-  // Helper function to apply mute state to game sounds
   function applyMuteStateToGameSounds(muted) {
-    isMuted = muted; // Update local state variable as well
+    isMuted = muted;
     gameAudioElements.forEach((audio) => {
       if (audio) audio.muted = muted;
     });
-    // If unmuting and music should be playing, start it (handle potential race conditions carefully)
-    // For simplicity, we'll let the game logic restart music when appropriate.
-    // If muting, pause background music immediately
     if (muted && backgroundMusic && !backgroundMusic.paused) {
       backgroundMusic.pause();
       console.log("Background music paused due to mute.");
@@ -90,20 +87,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function loadLevel(levelIndex) {
-    // Read mute state again in case it changed on another tab (optional but safer)
     isMuted = localStorage.getItem("mazeGameMuted") === "true";
     applyMuteStateToGameSounds(isMuted);
 
-    stopCollisionSound(); // Zaustavi zvuk ako je prethodno svirao
-    pauseBackgroundMusic(); // Pauziraj muziku pri učitavanju nivoa
+    stopCollisionSound();
+    pauseBackgroundMusic();
     clearTimeout(viewTimeout);
     clearInterval(gameTimerInterval);
-    gameActive = false; // Disable movement initially
+    clearInterval(viewTimerInterval);
+    gameActive = false;
 
     currentLevelData = levels[levelIndex];
-    playerPos = { ...currentLevelData.start }; // Copy start position
+    playerPos = { ...currentLevelData.start };
 
-    // Load attempts for this level
     attempts = userData.progress.levels[currentLevelData.level]?.attempts || 0;
     attemptsDisplay.textContent = attempts;
 
@@ -111,51 +107,46 @@ document.addEventListener("DOMContentLoaded", () => {
     timerDisplay.textContent = "0.0";
     elapsedTime = 0;
 
-    resizeCanvas(); // Adjust canvas size based on maze dimensions
-    updateThemeColors(); // Get colors based on current theme
+    resizeCanvas();
+    updateThemeColors();
 
     mazeVisible = true;
     messageOverlay.classList.add("hidden");
     nextLevelBtn.classList.add("hidden");
     restartLevelBtn.classList.add("hidden");
+    viewTimerBarContainer.classList.add("hidden");
+    canvas.classList.remove("maze-fading");
 
     drawMaze();
 
-    // Show maze for viewTime duration
     messageText.textContent = `Nivo ${currentLevelData.level}. Zapamtite put!`;
     messageOverlay.classList.remove("hidden");
+
+    startVisualTimer(currentLevelData.viewTime);
 
     viewTimeout = setTimeout(() => {
       console.log(
         `View timeout expired for level ${currentLevelData.level}. Hiding overlay and maze walls.`
-      ); // Log
+      );
+      clearInterval(viewTimerInterval);
+      viewTimerBarContainer.classList.add("hidden");
       mazeVisible = false;
       if (messageOverlay) {
-        // Provera da li element postoji
         messageOverlay.classList.add("hidden");
-        console.log("Overlay hidden class added."); // Log
+        console.log("Overlay hidden class added.");
       } else {
-        console.error("messageOverlay element not found!"); // Log greške ako nije pronađen
+        console.error("messageOverlay element not found!");
       }
 
-      // --- Ensure this block remains commented out ---
-      /*
-      // This block is now irrelevant as startSound variable is removed
-      if (startSound) {
-        console.log("This should NOT be logged - startSound in game.js timeout"); // Debug log
-        startSound.currentTime = 0; // Premotaj na početak za svaki slučaj
-        startSound
-          .play()
-          .catch((e) => console.error("Greška pri puštanju start zvuka (game.js):", e)); // Dodaj error handling
-      }
-      */
-      // --- End of commented out block ---
+      canvas.classList.add("maze-fading");
+      setTimeout(() => canvas.classList.remove("maze-fading"), 300);
 
-      console.log("About to play background music (uzicko.wav)."); // Log before playing background music
-      playBackgroundMusic(); // Pokreni pozadinsku muziku kada igra postane aktivna
+      console.log("About to play background music (uzicko.wav).");
+      playBackgroundMusic();
       startGameTimer();
-      gameActive = true; // Enable movement
-      drawMaze(); // Redraw without walls (or with player only)
+      gameActive = true;
+      if (controlsContainer) controlsContainer.style.display = "";
+      drawMaze();
     }, currentLevelData.viewTime);
   }
 
@@ -164,38 +155,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const mazeWidth = maze[0].length;
     const mazeHeight = maze.length;
 
-    // Use window dimensions for mobile, parent dimensions otherwise
-    const isMobile = window.innerWidth <= 600; // Check if likely mobile based on CSS breakpoint
-    // Set vertical padding to 0 to maximize available height
-    const mobileVerticalPadding = 0; // Postavljeno na 0
-    // Use full innerWidth on mobile, container padding is handled by box-sizing
+    const isMobile = window.innerWidth <= 600;
+    const mobileVerticalPadding = 0;
     const availableWidth = isMobile
       ? window.innerWidth
       : canvas.parentElement.clientWidth * 0.9;
     const availableHeight = isMobile
-      ? window.innerHeight - mobileVerticalPadding // Sada koristi punu visinu
+      ? window.innerHeight - mobileVerticalPadding
       : window.innerHeight * 0.7;
 
     const maxCellSizeW = Math.floor(availableWidth / mazeWidth);
     const maxCellSizeH = Math.floor(availableHeight / mazeHeight);
 
-    // Allow larger cells on mobile by increasing the hard limit significantly
-    const maxAllowedCellSize = isMobile ? 50 : 30; // Povećan limit za mobilne na 50
+    const maxAllowedCellSize = isMobile ? 50 : 30;
     cellSize = Math.max(
-      5, // Ensure minimum cell size
-      // Limit only by available space and the new larger cap
+      5,
       Math.min(maxCellSizeW, maxCellSizeH, maxAllowedCellSize)
     );
-    playerSize = cellSize * 0.6; // Player slightly smaller than cell
+    playerSize = cellSize * 0.6;
 
     canvas.width = mazeWidth * cellSize;
     canvas.height = mazeHeight * cellSize;
 
-    // Center canvas vertically if needed (optional, CSS margin:auto might be enough)
-    // const marginTop = Math.max(0, (availableHeight - canvas.height) / 2);
-    // canvas.style.marginTop = `${marginTop}px`;
     console.log(
-      `Resized canvas to: ${canvas.width}x${canvas.height}, CellSize: ${cellSize}, Available H: ${availableHeight}, Available W: ${availableWidth}` // Log width too
+      `Resized canvas to: ${canvas.width}x${canvas.height}, CellSize: ${cellSize}, Available H: ${availableHeight}, Available W: ${availableWidth}`
     );
   }
 
@@ -217,26 +200,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- Drawing ---
   function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const maze = currentLevelData.maze;
-    // No longer need bgColor here for drawing invisible walls
 
     for (let y = 0; y < maze.length; y++) {
       for (let x = 0; x < maze[y].length; x++) {
-        // Determine fill style based on cell type and visibility
         if (maze[y][x] === 1) {
-          // It's a wall
           if (mazeVisible) {
-            ctx.fillStyle = wallColor; // Visible wall color
+            ctx.fillStyle = wallColor;
           } else {
-            // Invisible wall - use the path color to blend in
             ctx.fillStyle = pathColor;
           }
         } else {
-          // It's a path
-          // Check if it's the start or end cell, only relevant if maze is visible
           if (
             mazeVisible &&
             x === currentLevelData.start.x &&
@@ -250,16 +226,13 @@ document.addEventListener("DOMContentLoaded", () => {
           ) {
             ctx.fillStyle = endColor;
           } else {
-            // Regular path color (also used for invisible walls)
             ctx.fillStyle = pathColor;
           }
         }
 
-        // Draw cell background
         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
       }
     }
-    // Always draw the player last
     drawPlayer();
   }
 
@@ -274,44 +247,38 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // --- Movement & Collision ---
   function movePlayer(dx, dy) {
     if (!gameActive) return;
 
     const nextX = playerPos.x + dx;
     const nextY = playerPos.y + dy;
 
-    // Check boundaries
     if (
       nextX < 0 ||
       nextX >= currentLevelData.maze[0].length ||
       nextY < 0 ||
       nextY >= currentLevelData.maze.length
     ) {
-      return; // Hit outer boundary
+      return;
     }
 
-    // Check wall collision
     if (currentLevelData.maze[nextY][nextX] === 1) {
-      // Proveri mute stanje PRE puštanja zvuka
-      isMuted = localStorage.getItem("mazeGameMuted") === "true"; // Pročitaj ponovo
+      isMuted = localStorage.getItem("mazeGameMuted") === "true";
       if (collisionSound && !isMuted) {
-        // Dodata provera !isMuted
-        stopCollisionSound(); // Zaustavi prethodni ako je svirao
-        collisionSound.currentTime = 0; // Počni od početka
+        stopCollisionSound();
+        collisionSound.currentTime = 0;
         collisionSound
           .play()
           .then(() => {
             console.log("Playing collision sound...");
-            // Postavi timeout da zaustavi zvuk nakon 6 sekundi
             collisionSoundTimeout = setTimeout(() => {
               if (collisionSound && !collisionSound.paused) {
                 collisionSound.pause();
-                collisionSound.currentTime = 0; // Resetuj vreme
+                collisionSound.currentTime = 0;
                 console.log("Collision sound stopped after 6 seconds.");
               }
-              collisionSoundTimeout = null; // Resetuj referencu
-            }, 6000); // 6000 milisekundi = 6 sekundi
+              collisionSoundTimeout = null;
+            }, 6000);
           })
           .catch((e) =>
             console.error("Greška pri puštanju collision zvuka:", e)
@@ -323,22 +290,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Move player
     playerPos.x = nextX;
     playerPos.y = nextY;
 
-    drawMaze(); // Redraw everything
+    drawMaze();
 
-    // Check win condition
     if (
       playerPos.x === currentLevelData.end.x &&
       playerPos.y === currentLevelData.end.y
     ) {
-      stopCollisionSound(); // Zaustavi zvuk sudara ako je svirao pre pobede
-      // Play win sound - Proveri mute stanje
-      isMuted = localStorage.getItem("mazeGameMuted") === "true"; // Pročitaj ponovo
+      stopCollisionSound();
+      isMuted = localStorage.getItem("mazeGameMuted") === "true";
       if (winSound && !isMuted) {
-        // Dodata provera !isMuted
         winSound.currentTime = 0;
         winSound
           .play()
@@ -351,13 +314,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function handleCollision() {
-    gameActive = false; // Stop movement
+    gameActive = false;
+    if (controlsContainer) controlsContainer.style.display = "none";
+
+    if (document.body) {
+      document.body.classList.add("screen-shake");
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (document.body) {
+            document.body.classList.remove("screen-shake");
+          }
+        }, 350);
+      });
+    }
+
     clearInterval(gameTimerInterval);
-    pauseBackgroundMusic(); // Pauziraj muziku kod sudara
+    pauseBackgroundMusic();
     attempts++;
     attemptsDisplay.textContent = attempts;
 
-    // Update attempts in user data
     const levelStats = userData.progress.levels[currentLevelData.level] || {
       bestTime: null,
       attempts: 0,
@@ -370,84 +345,136 @@ document.addEventListener("DOMContentLoaded", () => {
 
     messageText.textContent = "Udarili ste u zid! Pokušajte ponovo.";
     restartLevelBtn.classList.remove("hidden");
-    nextLevelBtn.classList.add("hidden"); // Sakrij dugme za sledeći nivo kod sudara
-    backToMenuWinBtn.classList.add("hidden"); // Hide win button on collision
+    nextLevelBtn.classList.add("hidden");
+    backToMenuWinBtn.classList.add("hidden");
     messageOverlay.classList.remove("hidden");
   }
 
   function handleWin() {
     gameActive = false;
+    if (controlsContainer) controlsContainer.style.display = "none";
     clearInterval(gameTimerInterval);
-    pauseBackgroundMusic(); // Pauziraj muziku kod pobede
+    pauseBackgroundMusic();
     const level = currentLevelData.level;
 
-    // Update stats
+    const endX = currentLevelData.end.x * cellSize;
+    const endY = currentLevelData.end.y * cellSize;
+    const flashColor = "#FFFF00";
+    let flashCount = 0;
+    const maxFlashes = 4;
+    const flashInterval = 100;
+
+    const flashEffect = setInterval(() => {
+      ctx.clearRect(endX, endY, cellSize, cellSize);
+      ctx.fillStyle = pathColor;
+      ctx.fillRect(endX, endY, cellSize, cellSize);
+      ctx.fillStyle = endColor;
+      ctx.fillRect(endX, endY, cellSize, cellSize);
+      if (
+        playerPos.x === currentLevelData.end.x &&
+        playerPos.y === currentLevelData.end.y
+      ) {
+        drawPlayer();
+      }
+
+      if (flashCount % 2 === 0) {
+        ctx.fillStyle = flashColor;
+        ctx.globalAlpha = 0.7;
+        ctx.fillRect(endX, endY, cellSize, cellSize);
+        ctx.globalAlpha = 1.0;
+      }
+
+      flashCount++;
+      if (flashCount >= maxFlashes) {
+        clearInterval(flashEffect);
+        ctx.clearRect(endX, endY, cellSize, cellSize);
+        ctx.fillStyle = pathColor;
+        ctx.fillRect(endX, endY, cellSize, cellSize);
+        ctx.fillStyle = endColor;
+        ctx.fillRect(endX, endY, cellSize, cellSize);
+        drawPlayer();
+        displayWinMessage(level);
+      }
+    }, flashInterval);
+  }
+
+  function displayWinMessage(level) {
     const levelStats = userData.progress.levels[level] || {
       bestTime: null,
       attempts: 0,
     };
-    levelStats.attempts = attempts + 1; // Include the winning attempt
+    levelStats.attempts = attempts + 1;
     if (levelStats.bestTime === null || elapsedTime < levelStats.bestTime) {
       levelStats.bestTime = elapsedTime;
     }
     userData.progress.levels[level] = levelStats;
 
-    // Unlock next level
     if (level >= userData.progress.currentLevel) {
       userData.progress.currentLevel = level + 1;
     }
 
-    // Check Achievements (Example)
     let newAchievements = [];
     const achievementKeyLevel = `Level ${level} Complete`;
     if (!userData.achievements.includes(achievementKeyLevel)) {
       userData.achievements.push(achievementKeyLevel);
       newAchievements.push(achievementKeyLevel);
     }
-    // Add more achievement checks here (e.g., perfect run, speed run)
 
-    // Save updated user data
     window.mazeGame.updateUserData(currentUser, {
       progress: userData.progress,
       achievements: userData.achievements,
     });
 
-    // Display win message
     let winMsg = `Nivo ${level} pređen za ${(elapsedTime / 1000).toFixed(2)}s!`;
     if (newAchievements.length > 0) {
       winMsg += `\nNova dostignuća: ${newAchievements.join(", ")}`;
     }
-    messageText.textContent = winMsg; // Set message text first
+    messageText.textContent = winMsg;
 
-    // Hide standard buttons initially
     nextLevelBtn.classList.add("hidden");
     restartLevelBtn.classList.add("hidden");
-    backToMenuWinBtn.classList.add("hidden"); // Hide win button initially
+    backToMenuWinBtn.classList.add("hidden");
 
-    // Show appropriate button based on level completion
     if (currentLevelIndex < levels.length - 1) {
-      nextLevelBtn.classList.remove("hidden"); // Show next level button
+      nextLevelBtn.classList.remove("hidden");
     } else {
       messageText.textContent += "\nČestitamo, prešli ste sve nivoe!";
-      backToMenuWinBtn.classList.remove("hidden"); // Show back to menu button on final level win
+      backToMenuWinBtn.classList.remove("hidden");
     }
 
-    messageOverlay.classList.remove("hidden"); // Show overlay with message and correct button
+    messageOverlay.classList.remove("hidden");
   }
 
-  // --- Timer ---
   function startGameTimer() {
     startTime = Date.now();
-    elapsedTime = 0; // Reset elapsed time for the current attempt
+    elapsedTime = 0;
     timerDisplay.textContent = "0.0";
 
     gameTimerInterval = setInterval(() => {
       elapsedTime = Date.now() - startTime;
       timerDisplay.textContent = (elapsedTime / 1000).toFixed(1);
-    }, 100); // Update every 100ms
+    }, 100);
   }
 
-  // --- Event Listeners ---
+  function startVisualTimer(duration) {
+    if (!viewTimerBar || !viewTimerBarContainer) return;
+
+    const startTime = Date.now();
+    viewTimerBar.style.width = "100%";
+    viewTimerBarContainer.classList.remove("hidden");
+
+    viewTimerInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, duration - elapsed);
+      const percentage = (remaining / duration) * 100;
+      viewTimerBar.style.width = `${percentage}%`;
+
+      if (remaining <= 0) {
+        clearInterval(viewTimerInterval);
+      }
+    }, 50);
+  }
+
   window.addEventListener("keydown", (e) => {
     if (!gameActive) return;
     switch (e.key) {
@@ -468,207 +495,181 @@ document.addEventListener("DOMContentLoaded", () => {
         movePlayer(1, 0);
         break;
     }
-    e.preventDefault(); // Prevent page scrolling
+    e.preventDefault();
   });
 
   window.addEventListener("resize", () => {
-    // Only redraw if a level is loaded
     if (currentLevelData) {
       resizeCanvas();
-      updateThemeColors(); // Colors might depend on viewport in complex CSS
+      updateThemeColors();
       drawMaze();
     }
   });
 
-  // --- Touch Event Listeners for Swipe Controls ---
   canvas.addEventListener(
     "touchstart",
     (e) => {
-      // Prevent scrolling when touching the canvas
       e.preventDefault();
       touchStartX = e.changedTouches[0].screenX;
       touchStartY = e.changedTouches[0].screenY;
     },
     { passive: false }
-  ); // Use passive: false to allow preventDefault
+  );
 
   canvas.addEventListener(
     "touchmove",
     (e) => {
-      // Prevent scrolling during swipe
       e.preventDefault();
-      // We only need the end position, so we update it here but don't act yet
       touchEndX = e.changedTouches[0].screenX;
       touchEndY = e.changedTouches[0].screenY;
     },
     { passive: false }
-  ); // Use passive: false to allow preventDefault
+  );
 
   canvas.addEventListener("touchend", (e) => {
-    // No preventDefault needed here as the touch sequence ends
     touchEndX = e.changedTouches[0].screenX;
     touchEndY = e.changedTouches[0].screenY;
     handleSwipe();
   });
 
   function handleSwipe() {
-    if (!gameActive) return; // Only handle swipes if game is active
+    if (!gameActive) return;
 
     const deltaX = touchEndX - touchStartX;
     const deltaY = touchEndY - touchStartY;
 
-    // Check if it's more horizontal or vertical swipe
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // Horizontal swipe
       if (Math.abs(deltaX) > swipeThreshold) {
         if (deltaX > 0) {
-          // Swipe Right
           console.log("Swipe Right");
           movePlayer(1, 0);
         } else {
-          // Swipe Left
           console.log("Swipe Left");
           movePlayer(-1, 0);
         }
       }
     } else {
-      // Vertical swipe
       if (Math.abs(deltaY) > swipeThreshold) {
         if (deltaY > 0) {
-          // Swipe Down
           console.log("Swipe Down");
           movePlayer(0, 1);
         } else {
-          // Swipe Up
           console.log("Swipe Up");
           movePlayer(0, -1);
         }
       }
     }
 
-    // Reset touch coordinates for the next swipe
     touchStartX = 0;
     touchStartY = 0;
     touchEndX = 0;
     touchEndY = 0;
   }
 
+  if (btnUp) btnUp.addEventListener("click", () => movePlayer(0, -1));
+  if (btnDown) btnDown.addEventListener("click", () => movePlayer(0, 1));
+  if (btnLeft) btnLeft.addEventListener("click", () => movePlayer(-1, 0));
+  if (btnRight) btnRight.addEventListener("click", () => movePlayer(1, 0));
+
   nextLevelBtn.addEventListener("click", () => {
-    stopCollisionSound(); // Zaustavi zvuk pre učitavanja sledećeg nivoa
-    // Stop win sound if it's playing
+    stopCollisionSound();
     if (winSound && !winSound.paused) {
       winSound.pause();
       winSound.currentTime = 0;
       console.log("Win sound stopped by Next Level button.");
     }
-    backToMenuWinBtn.classList.add("hidden"); // Hide win button
-    // Muzika će se pauzirati i ponovo pokrenuti u loadLevel
+    if (controlsContainer) controlsContainer.style.display = "none";
+    backToMenuWinBtn.classList.add("hidden");
     currentLevelIndex++;
     if (currentLevelIndex < levels.length) {
       loadLevel(currentLevelIndex);
     } else {
-      // Should not happen if button is hidden correctly, but handle anyway
       alert("Prešli ste sve nivoe!");
       window.location.href = "index.html";
     }
   });
 
   restartLevelBtn.addEventListener("click", () => {
-    stopCollisionSound(); // Zaustavi zvuk pre restarta
-    // Stop win sound if it's playing (less likely here, but good practice)
+    stopCollisionSound();
     if (winSound && !winSound.paused) {
       winSound.pause();
       winSound.currentTime = 0;
       console.log("Win sound stopped by Restart Level button.");
     }
-    backToMenuWinBtn.classList.add("hidden"); // Hide win button
-    // Muzika će se pauzirati i ponovo pokrenuti u loadLevel
-    // Reload the current level, reset timer and player position
+    if (controlsContainer) controlsContainer.style.display = "none";
+    backToMenuWinBtn.classList.add("hidden");
     loadLevel(currentLevelIndex);
   });
 
   backToMenuBtn.addEventListener("click", () => {
-    stopCollisionSound(); // Zaustavi zvuk pre povratka u meni
-    pauseBackgroundMusic(); // Pauziraj muziku pre povratka u meni
-    // Stop win sound if it's playing
+    stopCollisionSound();
+    pauseBackgroundMusic();
     if (winSound && !winSound.paused) {
       winSound.pause();
       winSound.currentTime = 0;
       console.log("Win sound stopped by Back to Menu button.");
     }
+    if (controlsContainer) controlsContainer.style.display = "none";
     window.location.href = "index.html";
   });
 
-  // Add theme toggle listener specific to game page if needed
   const themeToggleGame = document.getElementById("theme-toggle-game");
   if (themeToggleGame) {
     themeToggleGame.addEventListener("click", () => {
-      // Toggle theme using the function from app.js
       const currentTheme = document.body.getAttribute("data-theme") || "light";
       const newTheme = currentTheme === "light" ? "dark" : "light";
-      window.mazeGame.applyTheme(newTheme); // Apply theme to body and save preference
+      window.mazeGame.applyTheme(newTheme);
 
-      // Update canvas colors and redraw immediately
-      updateThemeColors(); // Recalculate wallColor, pathColor etc.
-      drawMaze(); // Redraw the maze and player with new colors
+      updateThemeColors();
+      drawMaze();
 
-      // Re-apply mute state just in case (though unlikely necessary)
       isMuted = localStorage.getItem("mazeGameMuted") === "true";
       applyMuteStateToGameSounds(isMuted);
     });
   }
 
-  // Optional: Pause music when tab loses focus
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       pauseBackgroundMusic();
     } else {
-      // Only resume if game is active AND not muted
       isMuted = localStorage.getItem("mazeGameMuted") === "true";
       if (gameActive && !isMuted) {
-        // Dodata provera !isMuted
-        playBackgroundMusic(); // Pokušaj ponovo da pustiš muziku
+        playBackgroundMusic();
       }
     }
   });
 
-  // Add event listener for the new win button
   backToMenuWinBtn.addEventListener("click", () => {
     stopCollisionSound();
     pauseBackgroundMusic();
-    // Stop win sound if it's playing
     if (winSound && !winSound.paused) {
       winSound.pause();
       winSound.currentTime = 0;
       console.log("Win sound stopped by Back to Menu (Win) button.");
     }
+    if (controlsContainer) controlsContainer.style.display = "none";
     window.location.href = "index.html";
   });
 
-  // --- Start the game ---
   initGame();
 
-  // Funkcija za zaustavljanje zvuka sudara
   function stopCollisionSound() {
     if (collisionSoundTimeout) {
-      clearTimeout(collisionSoundTimeout); // Obriši timeout ako postoji
+      clearTimeout(collisionSoundTimeout);
       collisionSoundTimeout = null;
     }
     if (collisionSound && !collisionSound.paused) {
       collisionSound.pause();
-      collisionSound.currentTime = 0; // Vrati na početak za sledeći put
+      collisionSound.currentTime = 0;
       console.log("Collision sound stopped.");
     }
   }
 
-  // Funkcija za kontrolu pozadinske muzike
   function playBackgroundMusic() {
-    isMuted = localStorage.getItem("mazeGameMuted") === "true"; // Pročitaj ponovo
+    isMuted = localStorage.getItem("mazeGameMuted") === "true";
     if (backgroundMusic && !isMuted) {
-      // Dodata provera !isMuted
-      // Pusti samo ako nije već pokrenuta
       if (backgroundMusic.paused) {
-        backgroundMusic.currentTime = 49; // Počni od 49. sekunde
+        backgroundMusic.currentTime = 49;
         backgroundMusic
           .play()
           .catch((e) =>
@@ -680,7 +681,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } else if (isMuted) {
       console.log("Background music muted.");
-      // Osiguraj da je pauzirana ako je stanje mute
       pauseBackgroundMusic();
     }
   }
@@ -692,7 +692,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Optional: Listen for storage changes to update mute state immediately
   window.addEventListener("storage", (event) => {
     if (event.key === "mazeGameMuted") {
       console.log("Mute state changed in another tab/window.");

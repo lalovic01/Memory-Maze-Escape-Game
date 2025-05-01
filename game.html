@@ -15,21 +15,26 @@
         <button id="back-to-menu-game">Nazad na Meni</button>
         <button id="theme-toggle-game">Promeni Temu</button>
       </div>
+      <div id="view-timer-bar-container" class="hidden">
+        <div id="view-timer-bar"></div>
+      </div>
       <canvas id="mazeCanvas"></canvas>
       <div id="message-overlay" class="hidden">
         <p id="message-text"></p>
         <button id="next-level-btn" class="hidden">Sledeći Nivo</button>
         <button id="restart-level-btn" class="hidden">Pokušaj Ponovo</button>
-        <!-- New button for returning to menu after final level -->
         <button id="back-to-menu-win-btn" class="hidden">Nazad na Meni</button>
+      </div>
+      <div id="controls-container" class="controls-container">
+        <button id="btn-up" aria-label="Gore">▲</button>
+        <button id="btn-left" aria-label="Levo">◀</button>
+        <button id="btn-down" aria-label="Dole">▼</button>
+        <button id="btn-right" aria-label="Desno">▶</button>
       </div>
     </div>
 
-    <!-- Optional Sound Elements -->
     <audio id="collision-sound" src="assets/genije.wav" preload="auto"></audio>
-    <!-- Update win sound source -->
     <audio id="win-sound" src="assets/pobeda.wav" preload="auto"></audio>
-    <!-- Background Music -->
     <audio
       id="background-music"
       src="assets/uzicko.wav"

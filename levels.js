@@ -1,7 +1,7 @@
 const levels = [
   {
     level: 1,
-    viewTime: 3000, // 3 sekunde
+    viewTime: 4000,
     maze: [
       [1, 1, 1, 1, 1],
       [1, 0, 1, 0, 1],
@@ -9,12 +9,12 @@ const levels = [
       [1, 0, 1, 0, 1],
       [1, 1, 1, 1, 1],
     ],
-    start: { x: 1, y: 1 }, // Kolona 1, Red 1 (0-indeksirano)
-    end: { x: 3, y: 3 }, // Kolona 3, Red 3
+    start: { x: 1, y: 1 },
+    end: { x: 3, y: 3 },
   },
   {
     level: 2,
-    viewTime: 3000,
+    viewTime: 4000,
     maze: [
       [1, 1, 1, 1, 1, 1, 1],
       [1, 0, 0, 0, 1, 0, 1],
@@ -28,7 +28,7 @@ const levels = [
   },
   {
     level: 3,
-    viewTime: 2500, // Malo manje vremena
+    viewTime: 3500,
     maze: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1],
       [1, 0, 0, 1, 0, 0, 0, 0, 1],
@@ -43,5 +43,4 @@ const levels = [
     start: { x: 1, y: 1 },
     end: { x: 7, y: 7 },
   },
-  // Dodaj više nivoa po potrebi
 ];

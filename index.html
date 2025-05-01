@@ -31,14 +31,12 @@
         <button id="start-game-btn">Započni Igru</button>
         <button id="leaderboard-btn">Leaderboard</button>
         <button id="achievements-btn">Dostignuća</button>
+        <button id="how-to-play-btn">Kako Igrati</button>
         <button id="reset-progress-btn">Resetuj Progres</button>
         <button id="logout-btn">Odjavi se</button>
-        <!-- Dugme za zvuk -->
         <button id="toggle-sound-btn" class="sound-toggle">🔊</button>
         <p id="menu-message" class="message"></p>
-        <!-- Optional message area for reset confirmation -->
       </div>
-
       <div id="leaderboard-section" class="hidden">
         <h2>Leaderboard</h2>
         <table id="leaderboard-table">
@@ -50,31 +48,58 @@
               <th>Pokušaji</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- Podaci će biti ubačeni pomoću JS -->
-          </tbody>
+          <tbody></tbody>
         </table>
         <button class="back-to-menu">Nazad na Meni</button>
       </div>
-
       <div id="achievements-section" class="hidden">
         <h2>Dostignuća</h2>
-        <ul id="achievements-list">
-          <!-- Dostignuća će biti ubačena pomoću JS -->
-        </ul>
+        <ul id="achievements-list"></ul>
         <button class="back-to-menu">Nazad na Meni</button>
       </div>
-
+      <div id="how-to-play-section" class="hidden">
+        <h2>Kako Igrati</h2>
+        <div class="instructions-content">
+          <p>
+            <strong>Cilj:</strong> Stići od zelenog početnog polja do crvenog
+            ciljnog polja.
+          </p>
+          <p><strong>Mehanika:</strong></p>
+          <ul>
+            <li>
+              Na početku svakog nivoa, videćete lavirint na nekoliko sekundi.
+              Zapamtite put!
+            </li>
+            <li>
+              Nakon toga, zidovi postaju nevidljivi (iste boje kao putanja).
+            </li>
+            <li>
+              Ako udarite u nevidljivi zid, vraćate se na početak nivoa i
+              pokušaj se beleži.
+            </li>
+          </ul>
+          <p><strong>Kontrole:</strong></p>
+          <ul>
+            <li>
+              <strong>Tastatura:</strong> Koristite strelice (↑, ↓, ←, →) ili
+              WASD tastere za kretanje.
+            </li>
+            <li>
+              <strong>Mobilni:</strong> Prevucite prstom (swipe) u željenom
+              smeru na polju.
+            </li>
+          </ul>
+          <p>Srećno!</p>
+        </div>
+        <button class="back-to-menu">Nazad na Meni</button>
+      </div>
       <button id="theme-toggle">Promeni Temu</button>
     </div>
-
-    <!-- Add Leaderboard Sound Element -->
     <audio
       id="leaderboard-sound"
       src="assets/leaderboard.wav"
       preload="auto"
     ></audio>
-    <!-- Add Start Sound Element for Menu -->
     <audio id="start-sound" src="assets/start.wav" preload="auto"></audio>
 
     <script src="app.js"></script>
@@ -88,7 +113,8 @@
           rel="noopener noreferrer"
           >lalovic203_</a
         >
-        | Email: mladenlalovic01@gmail.com
+        | Email:
+        <a href="mailto:mladenlalovic01@gmail.com">mladenlalovic01@gmail.com</a>
       </p>
     </footer>
   </body>
